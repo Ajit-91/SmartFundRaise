@@ -36,7 +36,7 @@ export const StateContextProvider = ({ children }) => {
 					form.title, // title
 					form.description, // description
 					form.target,
-					new Date(form.deadline).getTime(), // deadline,
+					parseInt(new Date(form.deadline).getTime()/1000), // deadline,
 					form.image,
 				],
 			});
@@ -58,6 +58,7 @@ export const StateContextProvider = ({ children }) => {
       deadline: campaign.deadline.toNumber(),
       amountCollected: ethers.utils.formatEther(campaign.amountCollected.toString()),
       image: campaign.image,
+      updates: campaign.updates,
       pId: i
     }));
 

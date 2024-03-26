@@ -7,6 +7,7 @@ import { CountBox, CustomButton, Loader } from '../components';
 import { calculateBarPercentage, daysLeft } from '../utils';
 import { thirdweb } from '../assets';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import Update from '@/components/campaignUpdates/Update';
 
 
 const CampaignDetails = () => {
@@ -85,7 +86,15 @@ const CampaignDetails = () => {
               <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{state.description}</p>
             </div>
             </TabsContent>
-            <TabsContent value="updates">Change your password here.</TabsContent>
+            <TabsContent value="updates">
+              <div className='flex-col justify-center  w-full'>
+                {[1,2,300,41,5,301,41,6].map((update, index) => {
+                  console.log({update})
+                  // const updateId = update.toNumber();
+                  return  <Update key={index} updateId={update} />
+                })}
+              </div>
+            </TabsContent>
           </Tabs>
 
           {/* <div>

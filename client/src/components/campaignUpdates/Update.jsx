@@ -8,8 +8,9 @@ import Step5 from './Step5'
 import Step6 from './Step6'
 
 const Update = ({updateId}) => {
+  console.log({updateId})
   return (
-    <>
+    <div className='w-[50%]'>
         {updateId === 1 ? <Step1 /> :
         updateId === 2 ? <Step2 /> :
         updateId === 41 ? <Step4_1 /> :
@@ -17,7 +18,7 @@ const Update = ({updateId}) => {
         updateId === 5 ? <Step5 /> :
         updateId === 6 ? <Step6 /> : 
         <Step3 />}
-    </>
+    </div>
   )
 }
 
