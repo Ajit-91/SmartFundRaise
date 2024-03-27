@@ -22,6 +22,7 @@ contract SmartFundRaise {
         uint256 yesVotes;
         uint256 noVotes;
         uint256 amount;
+        string description;
         string docLink;
         bool isExpired;
     }
@@ -92,11 +93,12 @@ contract SmartFundRaise {
     //     }
     // }
 
-    function createWithdrawRequest(uint256 _id, uint256 _amount, string memory _docLink) public {
+    function createWithdrawRequest(uint256 _id, uint256 _amount, string memory _description,  string memory _docLink) public {
         Campaign storage campaign = campaigns[_id];
         require(campaign.owner == msg.sender, "You are not the owner of this campaign.");
         require(campaign.amountCollected >= campaign.target, "Target amount is not collected yet, cannot initiate withdrawl process.");
-        require(campaign.updates[campaign.updates.length - 1] == 2, "Campaign is not in withdrawl phase as target is not reached yet.");
+        uint256 latestUpdate = campaign.updates[campaign.updates.length - 1];
+        require(latestUpdate == 2 || latestUpdate == 42|| latestUpdate == 5, "Campaign is not in withdrawl phase as target is not reached yet.");
         require(_amount > 0 && _amount <= campaign.amountCollected - campaign.amountClaimed, "The amount should be greater than 0 and less than the remaining claimed amount.");
         
         uint key = 300 +campaign.noOfWithdrawRequests;
@@ -104,6 +106,7 @@ contract SmartFundRaise {
             yesVotes: 0,
             noVotes: 0,
             amount: _amount,
+            description: _description,
             docLink: _docLink,
             isExpired: false
         });

@@ -36,6 +36,7 @@ const CampaignDetails = () => {
   }, [contract, address])
 
   const handleDonate = async () => {
+    // add in try catch
     if(!amount) return alert("Please enter a valid amount to donate");
     if(currentCampaign.deadline*1000 < Date.now()) return alert("Deadline has passed. You can't donate to this campaign now.")
     if(currentCampaign.owner === address) return alert("You can't donate to your own campaign.");

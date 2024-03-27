@@ -17,7 +17,7 @@ const Update = ({updateId, isLastestUpdate}) => {
         updateId === 42 ? <Step4_2 isLastestUpdate={isLastestUpdate} /> :
         updateId === 5 ? <Step5  isLastestUpdate={isLastestUpdate} /> :
         updateId === 6 ? <Step6 isLastestUpdate={isLastestUpdate} /> : 
-        <Step3 isLastestUpdate={isLastestUpdate} />}
+        <Step3 updateId={updateId} isLastestUpdate={isLastestUpdate} />}
     </div>
   )
 }

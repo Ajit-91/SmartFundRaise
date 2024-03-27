@@ -50,24 +50,53 @@ export const StateContextProvider = ({ children }) => {
     }
   }
 
-  const createWithdrawRequest = async (amount, dockLink) => {
+  const donate = async (pId, amount) => {
+    if(!amount) return alert("Please enter a valid amount to donate");
+    const data = await contract.call('donateToCampaign', [pId], { value: ethers.utils.parseEther(amount)});
+
+    return data;
+  }
+
+
+  const createWithdrawRequest = async (amount, description, dockLink) => {
     try {
        await contract.call('createWithdrawRequest', [
         currentCampaign.pId,
         ethers.utils.parseUnits(amount, 18),
+        // description,
         dockLink
       ]);
       
     } catch (error) {
       console.log("createWithdrawRequest failure", error)
+      throw error;
     }
   }
 
-  const voteYes = async (wId) => {
+  const voteYes = async (wrId) => {
     try {
-      await contract.call('voteYes', [currentCampaign.pId, wId]);
+      await contract.call('voteYes', [currentCampaign.pId, wrId]);
     } catch (error) {
       console.log("voteYes failure", error)
+      alert("Failed to vote")
+    }
+  }
+
+  const voteNo = async (wrId) => {
+    try {
+      await contract.call('voteNo', [currentCampaign.pId, wrId]);
+    } catch (error) {
+      console.log("voteNo failure", error)
+      alert("Failed to vote")
+    }
+  }
+
+  const withdraw = async () => {
+    try {
+      await contract.call('withdraw', [currentCampaign.pId]);
+    } catch (error) {
+      console.log("withdraw failure", error)
+      throw error;
     }
   }
 
@@ -97,15 +126,10 @@ export const StateContextProvider = ({ children }) => {
     return filteredCampaigns;
   }
 
-  const donate = async (pId, amount) => {
-    if(!amount) return alert("Please enter a valid amount to donate");
-    const data = await contract.call('donateToCampaign', [pId], { value: ethers.utils.parseEther(amount)});
 
-    return data;
-  }
 
   const getDonations = async (pId) => {
-    const donations = await contract.call('getDonators', [pId]);
+    const donations = await contract.call('getDonorsAndDonations', [pId]);
     const numberOfDonations = donations[0].length;
 
     const parsedDonations = [];
@@ -123,9 +147,37 @@ export const StateContextProvider = ({ children }) => {
   const isOwner = () => address === currentCampaign.owner;
 
   const isDonor = async () => {
-    return await contract.call('isDonor', [currentCampaign.pId]);
+    try {
+      let data =  await contract.call("donations", [currentCampaign.pId, address]);
+      data = ethers.BigNumber.from(data); // Convert to BigNumber
+      console.log({isDonor: data})
+      return !data.isZero(); // Check if data is not zero
+    } catch (error) {
+      console.log("isDonor failure", error)
+      throw error
+    }
   }
 
+  const getWithdrawRequest = async (wrId) => {
+    try {
+      const data = await contract.call("withdrawRequests", [currentCampaign.pId, wrId]);
+      console.log({wrData : data})
+      const yes = data.yesVotes.toNumber();
+      const no = data.noVotes.toNumber();
+      const total = yes + no;
+      return {
+        amount: ethers.utils.formatEther(data.amount.toString()),
+        description: data.description,
+        docLink: data.docLink,
+        yesVotes: yes,
+        noVotes: no,
+        totalVotes: total,
+      }
+    } catch (error) {
+      console.log("getWithdrawRequest failure", error)
+      throw error;
+    }
+  }
 
   return (
     <StateContext.Provider
@@ -144,6 +196,11 @@ export const StateContextProvider = ({ children }) => {
         toggleTheme,
         currentCampaign,
         setCurrentCampaign,
+        createWithdrawRequest,
+        voteYes,
+        voteNo,
+        withdraw,
+        getWithdrawRequest,
       }}
     >
       {children}

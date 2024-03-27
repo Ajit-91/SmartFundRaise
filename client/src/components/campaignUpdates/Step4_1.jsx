@@ -11,7 +11,7 @@ import { CustomButton } from '..'
 import { useStateContext } from '@/context';
 
 const Step4_1 = ({ isLastestUpdate }) => {
-    const { isOwner } = useStateContext();
+    const { isOwner, withdraw } = useStateContext();
 
     return (
         <>
@@ -22,7 +22,7 @@ const Step4_1 = ({ isLastestUpdate }) => {
                 </CardHeader>
                 {isOwner() && (
                     <CardContent>
-                        <CustomButton disabled={!isLastestUpdate} title="Withdraw" styles="bg-[#4acd8d] w-full" />
+                        <CustomButton handleClick={withdraw} disabled={!isLastestUpdate} title="Withdraw" styles="bg-[#4acd8d] w-full" />
                     </CardContent>
                 )}
             </Card>

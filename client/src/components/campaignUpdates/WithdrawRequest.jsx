@@ -10,8 +10,10 @@ import {
 import { useState } from "react"
 import { CustomButton, FormField } from ".."
 import { checkIfValidUrl } from "@/utils"
+import { useStateContext } from "@/context"
 
 export function WithdrawRequest({ isLastestUpdate }) {
+    const {createWithdrawRequest} = useStateContext()
     const [form, setForm] = useState({
         amount: "",
         description: "",
@@ -22,11 +24,16 @@ export function WithdrawRequest({ isLastestUpdate }) {
         setForm({ ...form, [fieldName]: e.target.value })
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         const { amount, description, docLink } = form
         if (!amount || !description) return alert("amount and description are mandatory fields")
         if(docLink && !checkIfValidUrl(docLink)) return alert("Please provide a valid document link")
+        try {
+            await createWithdrawRequest(amount, description, docLink)
+        } catch (error) {
+            alert("Error while creating withdraw request")
+        }
         // call contract function to withdraw
     }
 
@@ -36,7 +43,7 @@ export function WithdrawRequest({ isLastestUpdate }) {
                 <CustomButton disabled={!isLastestUpdate} title="Create Withdrawl Request" styles="bg-[#4acd8d] w-full" />
             </DialogTrigger>
             <DialogContent className="sm:max-w-[550px]">
-                <form>
+                <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Create Withdraw Request</DialogTitle>
                         <DialogDescription>
@@ -49,7 +56,7 @@ export function WithdrawRequest({ isLastestUpdate }) {
                         placeholder="ETH 0.50"
                         inputType="text"
                         value={form.amount}
-                        handleChange={(e) => handleChange('amount', e)}
+                        handleChange={(e) => handleChange(e, 'amount')}
                     />
                     <br/>
                     <FormField
@@ -65,7 +72,7 @@ export function WithdrawRequest({ isLastestUpdate }) {
                         placeholder="https://exampleDocumentLink.com"
                         inputType="text"
                         value={form.docLink}
-                        handleChange={(e) => handleChange('docLink', e)}
+                        handleChange={(e) => handleChange(e, 'docLink')}
                     />
                     <br/>
                     <DialogFooter>
@@ -73,7 +80,6 @@ export function WithdrawRequest({ isLastestUpdate }) {
                             btnType="submit"
                             title="Submit request"
                             styles="bg-[#1dc071]"
-                            onClick={handleSubmit}
                         />
                     </DialogFooter>
                 </form>
