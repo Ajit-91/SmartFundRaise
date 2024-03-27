@@ -8,7 +8,7 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 
-const Step4_1 = () => {
+const Step6 = () => {
     return (
         <>
         <Card>
@@ -21,4 +21,4 @@ const Step4_1 = () => {
     )
 }
 
-export default Step4_1
+export default Step6

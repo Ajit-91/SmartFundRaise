@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card"
 import { CustomButton } from '..'
 
-const Step5 = () => {
+const Step5 = ({isLastestUpdate}) => {
     return (
         <>
         <Card>
@@ -18,10 +18,10 @@ const Step5 = () => {
                 <CardDescription>Amount specified in withdrawl request has been withdrawn successfully</CardDescription>
             </CardHeader>
             <CardContent>
-                <CustomButton title="Create Withdrawl Request" styles="bg-[#4acd8d] w-full" />
+                <CustomButton disabled={!isLastestUpdate} title="Create Withdrawl Request" styles="bg-[#4acd8d] w-full" />
             </CardContent>
         </Card>
-        <div className="h-10 w-1 bg-gray-300 mx-auto"></div>
+        {!isLastestUpdate && <div className="h-10 w-1 bg-gray-300 mx-auto"></div>}
         </>
     )
 }

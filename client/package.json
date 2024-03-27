@@ -9,6 +9,7 @@
     "deploy": "yarn build && npx thirdweb@latest upload dist"
   },
   "dependencies": {
+    "@radix-ui/react-progress": "^1.0.3",
     "@radix-ui/react-tabs": "^1.0.4",
     "@thirdweb-dev/chains": "^0.1.46",
     "@thirdweb-dev/react": "^3.14.35",

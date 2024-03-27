@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card"
 import { CustomButton } from '..'
 
-const Step4_1 = () => {
+const Step4_1 = ({isLastestUpdate}) => {
     return (
         <>
         <Card>
@@ -18,10 +18,10 @@ const Step4_1 = () => {
                 <CardDescription>More than 50% of donors voted for yes. Owner can withdraw the amount specified in withdrawl request</CardDescription>
             </CardHeader>
             <CardContent>
-                <CustomButton title="Withdraw" styles="bg-[#4acd8d] w-full" />
+                <CustomButton disabled={!isLastestUpdate} title="Withdraw" styles="bg-[#4acd8d] w-full" />
             </CardContent>
         </Card>
-        <div className="h-10 w-1 bg-gray-300 mx-auto"></div>
+        {!isLastestUpdate && <div className="h-10 w-1 bg-gray-300 mx-auto"></div>}
         </>
     )
 }

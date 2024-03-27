@@ -88,10 +88,10 @@ const CampaignDetails = () => {
             </TabsContent>
             <TabsContent value="updates">
               <div className='flex-col justify-center  w-full'>
-                {[1,2,300,41,5,301,41,6].map((update, index) => {
+                {[1,2,300,41,5,301,41].map((update, index) => {
                   console.log({update})
                   // const updateId = update.toNumber();
-                  return  <Update key={index} updateId={update} />
+                  return  <Update key={index} updateId={update} isLastestUpdate = {index === 7-1} />
                 })}
               </div>
             </TabsContent>
