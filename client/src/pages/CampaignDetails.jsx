@@ -11,30 +11,38 @@ import Update from '@/components/campaignUpdates/Update';
 
 
 const CampaignDetails = () => {
-  const { state } = useLocation();
   const navigate = useNavigate();
-  const { donate, getDonations, contract, address } = useStateContext();
-
+  const { donate, getDonations, contract, address, currentCampaign } = useStateContext();
   const [isLoading, setIsLoading] = useState(false);
   const [amount, setAmount] = useState('');
   const [donators, setDonators] = useState([]);
 
-  const remainingDays = daysLeft(state.deadline);
+  useEffect(() => {
+    if(!currentCampaign || Object.keys(currentCampaign).length === 0) return navigate('/')
+  }, [])
+
+
+  const remainingDays = daysLeft(currentCampaign.deadline);
 
   const fetchDonators = async () => {
-    const data = await getDonations(state.pId);
+    const data = await getDonations(currentCampaign.pId);
 
     setDonators(data);
   }
+
 
   useEffect(() => {
     if (contract) fetchDonators();
   }, [contract, address])
 
   const handleDonate = async () => {
+    if(!amount) return alert("Please enter a valid amount to donate");
+    if(currentCampaign.deadline*1000 < Date.now()) return alert("Deadline has passed. You can't donate to this campaign now.")
+    if(currentCampaign.owner === address) return alert("You can't donate to your own campaign.");
+    if(currentCampaign.amountCollected + amount > currentCampaign.target) return alert("You can't donate more than the target amount.");
     setIsLoading(true);
 
-    await donate(state.pId, amount);
+    await donate(currentCampaign.pId, amount);
 
     navigate('/')
     setIsLoading(false);
@@ -46,16 +54,16 @@ const CampaignDetails = () => {
 
       <div className="w-full flex md:flex-row flex-col mt-10 gap-[30px]">
         <div className="flex-1 flex-col">
-          <img src={state.image} alt="campaign" className="w-full h-[410px] object-cover rounded-xl" />
+          <img src={currentCampaign.image} alt="campaign" className="w-full h-[410px] object-cover rounded-xl" />
           <div className="relative w-full h-[5px] bg-[#3a3a43] mt-2">
-            <div className="absolute h-full bg-[#4acd8d]" style={{ width: `${calculateBarPercentage(state.target, state.amountCollected)}%`, maxWidth: '100%' }}>
+            <div className="absolute h-full bg-[#4acd8d]" style={{ width: `${calculateBarPercentage(currentCampaign.target, currentCampaign.amountCollected)}%`, maxWidth: '100%' }}>
             </div>
           </div>
         </div>
 
         <div className="flex md:w-[150px] w-full flex-wrap justify-between gap-[30px]">
           <CountBox title="Days Left" value={remainingDays >= 0 ? remainingDays : "Ended"} />
-          <CountBox title={`Raised of ${state.target}`} value={state.amountCollected} />
+          <CountBox title={`Raised of ${currentCampaign.target}`} value={currentCampaign.amountCollected} />
           <CountBox title="Total Donors" value={donators.length} />
         </div>
       </div>
@@ -70,7 +78,7 @@ const CampaignDetails = () => {
                 <img src={thirdweb} alt="user" className="w-[60%] h-[60%] object-contain" />
               </div>
               <div>
-                <h4 className="font-epilogue font-semibold text-[14px] dark:text-white break-all">{state.owner}</h4>
+                <h4 className="font-epilogue font-semibold text-[14px] dark:text-white break-all">{currentCampaign.owner}</h4>
                 <p className="mt-[4px] font-epilogue font-normal text-[12px] text-[#808191]">10 Campaigns</p>
               </div>
             </div>
@@ -83,15 +91,15 @@ const CampaignDetails = () => {
             </TabsList>
             <TabsContent value="about">
             <div className="mt-[20px]">
-              <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{state.description}</p>
+              <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{currentCampaign.description}</p>
             </div>
             </TabsContent>
             <TabsContent value="updates">
               <div className='flex-col justify-center  w-full'>
-                {[1,2,300,41,5,301,41].map((update, index) => {
+                {[1,2,300,41,5,301,41,5].map((update, index) => {
                   console.log({update})
                   // const updateId = update.toNumber();
-                  return  <Update key={index} updateId={update} isLastestUpdate = {index === 7-1} />
+                  return  <Update key={index} updateId={update} isLastestUpdate = {index === 8-1} />
                 })}
               </div>
             </TabsContent>
@@ -101,7 +109,7 @@ const CampaignDetails = () => {
             <h4 className="font-epilogue font-semibold text-[18px] dark:text-white uppercase">Story</h4>
 
             <div className="mt-[20px]">
-              <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{state.description}</p>
+              <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{currentCampaign.description}</p>
             </div>
           </div> */}
 

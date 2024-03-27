@@ -9,8 +9,11 @@ import {
 } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { CustomButton } from '..'
+import { useStateContext } from '@/context'
 
 const Step3 = ({isLastestUpdate}) => {
+  const { isDonor } = useStateContext();
+
   return (
     <>
       <Card>
@@ -33,15 +36,17 @@ const Step3 = ({isLastestUpdate}) => {
           </div>
           <Progress className="w-full h-2" value={28} />
         </CardContent>
+        {isDonor() && (
+          <>
+          {/* <CardDescription>Tip for donors: Always check the request details before voting</CardDescription> */}
         <CardFooter className="flex gap-4">
-          {/* <Button>Vote Yes</Button>
-        <Button>Vote No</Button> */}
           <CustomButton disabled={!isLastestUpdate} title="Vote Yes" styles="bg-[#4acd8d] w-full" />
           <CustomButton disabled={!isLastestUpdate} title="Vote No" styles="bg-[#4acd8d] w-full" />
-
         </CardFooter>
+          </>
+        )}
       </Card>
-      {!isLastestUpdate && <div className="h-10 w-1 bg-gray-300 mx-auto"></div>}
+      {!isLastestUpdate && <div className="h-10 w-0.5 bg-gray-300 mx-auto"></div>}
     </>
   )
 }

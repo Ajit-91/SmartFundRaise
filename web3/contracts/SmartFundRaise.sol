@@ -3,11 +3,12 @@ pragma solidity ^0.8.9;
 
 contract SmartFundRaise {
     struct Campaign {
+        // uint256 id;
         address owner;
         string title;
         string description;
         string image;
-        // uint256 startDate;
+        uint256 startDate;
         uint256 target;
         uint256 deadline;
         uint256 noOfDonors;
@@ -17,7 +18,7 @@ contract SmartFundRaise {
         uint256 [] updates;
     }
 
-    struct VotesData {
+    struct WithdrawRequest {
         uint256 yesVotes;
         uint256 noVotes;
         uint256 amount;
@@ -28,7 +29,7 @@ contract SmartFundRaise {
 
     mapping(uint256 => Campaign) public campaigns;
     mapping(uint256 => mapping(address => uint256)) public donations;
-    mapping(uint256 => mapping(uint256 => VotesData)) public votes;
+    mapping(uint256 => mapping(uint256 => WithdrawRequest)) public withdrawRequests;
     uint256 public numberOfCampaigns = 0;
 
     function createCampaign(address _owner, string memory _title, string memory _description, uint256 _target, uint256 _deadline, string memory _image) public returns (uint256) {
@@ -98,7 +99,7 @@ contract SmartFundRaise {
         require(_amount > 0 && _amount <= campaign.amountCollected - campaign.amountClaimed, "The amount should be greater than 0 and less than the remaining claimed amount.");
         
         uint key = 300 +campaign.noOfWithdrawRequests;
-        votes[_id][key] = VotesData({
+        withdrawRequests[_id][key] = WithdrawRequest({
             yesVotes: 0,
             noVotes: 0,
             amount: _amount,
@@ -112,12 +113,12 @@ contract SmartFundRaise {
     function voteYes(uint256 _id, uint256 _key) public {
         Campaign storage campaign = campaigns[_id];
         require(donations[_id][msg.sender] > 0, "You are not a donor for this campaign, Only donors can vote.");
-        require(votes[_id][_key].isExpired == false, "The voting period has expired.");
+        require(withdrawRequests[_id][_key].isExpired == false, "The voting period has expired.");
         require(campaign.updates[campaign.updates.length - 1] == _key, "The campaign is not in the voting phase.");
 
-        votes[_id][_key].yesVotes++;
-        if(votes[_id][_key].yesVotes > campaign.noOfDonors / 2) {
-            votes[_id][_key].isExpired = true;
+        withdrawRequests[_id][_key].yesVotes++;
+        if(withdrawRequests[_id][_key].yesVotes > campaign.noOfDonors / 2) {
+            withdrawRequests[_id][_key].isExpired = true;
             campaign.updates.push(41);
         }
     }
@@ -125,12 +126,12 @@ contract SmartFundRaise {
     function voteNo(uint256 _id, uint256 _key) public {
         Campaign storage campaign = campaigns[_id];
         require(donations[_id][msg.sender] > 0, "You are not a donor for this campaign, Only donors can vote.");
-        require(votes[_id][_key].isExpired == false, "The voting period has expired.");
+        require(withdrawRequests[_id][_key].isExpired == false, "The voting period has expired.");
         require(campaign.updates[campaign.updates.length - 1] == _key, "The campaign is not in the voting phase.");
 
-        votes[_id][_key].noVotes++;
-        if(votes[_id][_key].noVotes > campaign.noOfDonors / 2) { // 50% of donors vote no
-            votes[_id][_key].isExpired = true;
+        withdrawRequests[_id][_key].noVotes++;
+        if(withdrawRequests[_id][_key].noVotes > campaign.noOfDonors / 2) { // 50% of donors vote no
+            withdrawRequests[_id][_key].isExpired = true;
             campaign.updates.push(42);
         }
     }
@@ -140,7 +141,7 @@ contract SmartFundRaise {
         require(campaign.owner == msg.sender, "You are not the owner of this campaign.");
         require(campaign.updates[campaign.updates.length - 1] == 41, "Campaign is not in withdrawl phase.");
 
-        uint256 amount = votes[_id][campaign.updates[campaign.updates.length - 2]].amount;
+        uint256 amount = withdrawRequests[_id][campaign.updates[campaign.updates.length - 2]].amount;
 
         (bool sent,) = payable(msg.sender).call{value: amount}("");
 
@@ -186,7 +187,12 @@ contract SmartFundRaise {
 
         return allCampaigns;
     }
+
+    function isDonor(uint256 _id) public view returns (bool) {
+        return donations[_id][msg.sender] > 0;
+    }
 }
+
 
 
 

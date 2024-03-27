@@ -8,20 +8,27 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { CustomButton } from '..'
+import { useStateContext } from '@/context';
+import { WithdrawRequest } from './WithdrawRequest';
 
 const Step5 = ({isLastestUpdate}) => {
+    const { isOwner } = useStateContext();
+
     return (
         <>
         <Card>
             <CardHeader>
                 <CardTitle>Withdraw Success !!</CardTitle>
                 <CardDescription>Amount specified in withdrawl request has been withdrawn successfully</CardDescription>
+                <CardDescription>New withdrawl request can be created to withdraw the remaining amount</CardDescription>
             </CardHeader>
-            <CardContent>
-                <CustomButton disabled={!isLastestUpdate} title="Create Withdrawl Request" styles="bg-[#4acd8d] w-full" />
-            </CardContent>
+            {isOwner() && (
+                <CardContent>
+                    <WithdrawRequest isLastestUpdate={isLastestUpdate} />
+                </CardContent>
+            )}
         </Card>
-        {!isLastestUpdate && <div className="h-10 w-1 bg-gray-300 mx-auto"></div>}
+        {!isLastestUpdate && <div className="h-10 w-0.5 bg-gray-300 mx-auto"></div>}
         </>
     )
 }

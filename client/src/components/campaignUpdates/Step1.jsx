@@ -17,7 +17,7 @@ const Step1 = ({isLastestUpdate}) => {
                 <CardDescription>Campaign is just started. Donors can donate as much as they want</CardDescription>
             </CardHeader>
         </Card>
-        {!isLastestUpdate && <div className="h-10 w-1 bg-gray-300 mx-auto"></div>}
+        {!isLastestUpdate && <div className="h-10 w-0.5 bg-gray-300 mx-auto"></div>}
         </>
     )
 }

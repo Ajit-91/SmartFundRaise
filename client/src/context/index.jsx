@@ -14,6 +14,9 @@ export const StateContextProvider = ({ children }) => {
   const connect = useMetamask();
 
   const [theme, setTheme] = useState('light');
+  const [currentCampaign, setCurrentCampaign] = useState({});
+
+  console.log({currentCampaign})
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light')
@@ -74,6 +77,7 @@ export const StateContextProvider = ({ children }) => {
   }
 
   const donate = async (pId, amount) => {
+    if(!amount) return alert("Please enter a valid amount to donate");
     const data = await contract.call('donateToCampaign', [pId], { value: ethers.utils.parseEther(amount)});
 
     return data;
@@ -95,6 +99,12 @@ export const StateContextProvider = ({ children }) => {
     return parsedDonations;
   }
 
+  const isOwner = () => address === currentCampaign.owner;
+
+  const isDonor = async () => {
+    return await contract.call('isDonor', [currentCampaign.pId]);
+  }
+
 
   return (
     <StateContext.Provider
@@ -105,10 +115,14 @@ export const StateContextProvider = ({ children }) => {
         createCampaign: publishCampaign,
         getCampaigns,
         getUserCampaigns,
+        isOwner,
+        isDonor,
         donate,
         getDonations,
         theme,
         toggleTheme,
+        currentCampaign,
+        setCurrentCampaign,
       }}
     >
       {children}

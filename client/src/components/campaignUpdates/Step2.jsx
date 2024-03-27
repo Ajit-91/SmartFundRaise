@@ -8,8 +8,12 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { CustomButton } from '..'
+import { useStateContext } from '@/context';
+import { WithdrawRequest } from './WithdrawRequest';
 
 const Step2 = ({isLastestUpdate}) => {
+    const { isOwner } = useStateContext();
+
     return (
         <>
         <Card>
@@ -17,12 +21,13 @@ const Step2 = ({isLastestUpdate}) => {
                 <CardTitle>Target Reached !!</CardTitle>
                 <CardDescription>Target amount is collected. Owner can initiate withdrawl process by creating withdrawl request</CardDescription>
             </CardHeader>
-            <CardContent>
-                Tip for owner : Often high amount withdrawl requests are rejected. Believe in partial fund withdraw. Start from small amount
-                <CustomButton disabled={!isLastestUpdate} title="Create Withdrawl Request" styles="bg-[#4acd8d] w-full" />
+          {isOwner() && (
+          <CardContent>
+                <WithdrawRequest isLastestUpdate={isLastestUpdate} />
             </CardContent>
+            )}
         </Card>
-        {!isLastestUpdate && <div className="h-10 w-1 bg-gray-300 mx-auto"></div>}
+        {!isLastestUpdate && <div className="h-10 w-0.5 bg-gray-300 mx-auto"></div>}
         </>
     )
 }
