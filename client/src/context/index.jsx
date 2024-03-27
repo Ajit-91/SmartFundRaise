@@ -50,6 +50,27 @@ export const StateContextProvider = ({ children }) => {
     }
   }
 
+  const createWithdrawRequest = async (amount, dockLink) => {
+    try {
+       await contract.call('createWithdrawRequest', [
+        currentCampaign.pId,
+        ethers.utils.parseUnits(amount, 18),
+        dockLink
+      ]);
+      
+    } catch (error) {
+      console.log("createWithdrawRequest failure", error)
+    }
+  }
+
+  const voteYes = async (wId) => {
+    try {
+      await contract.call('voteYes', [currentCampaign.pId, wId]);
+    } catch (error) {
+      console.log("voteYes failure", error)
+    }
+  }
+
   const getCampaigns = async () => {
     const campaigns = await contract.call('getCampaigns');
     console.log({campaigns})

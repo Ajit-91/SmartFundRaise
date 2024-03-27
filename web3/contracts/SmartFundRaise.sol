@@ -11,11 +11,11 @@ contract SmartFundRaise {
         uint256 startDate;
         uint256 target;
         uint256 deadline;
-        uint256 noOfDonors;
         uint256 amountCollected;
         uint256 noOfWithdrawRequests;
         uint256 amountClaimed;
         uint256 [] updates;
+        address [] donors;
     }
 
     struct WithdrawRequest {
@@ -41,9 +41,9 @@ contract SmartFundRaise {
         campaign.title = _title;
         campaign.description = _description;
         campaign.image = _image;
+        campaign.startDate = block.timestamp;
         campaign.target = _target;
         campaign.deadline = _deadline;
-        campaign.noOfDonors = 0;
         campaign.amountCollected = 0;
         campaign.noOfWithdrawRequests = 0;
         campaign.amountClaimed = 0;
@@ -64,8 +64,9 @@ contract SmartFundRaise {
         require(campaign.updates[campaign.updates.length - 1] == 1, "Campaign is not in donation phase.");
 
         if(donations[_id][msg.sender] == 0) { // new donor is donating
-            campaign.noOfDonors++;
+            campaign.donors.push(msg.sender);
         }
+
         donations[_id][msg.sender] += amount;
         campaign.amountCollected += amount;
 
@@ -117,7 +118,7 @@ contract SmartFundRaise {
         require(campaign.updates[campaign.updates.length - 1] == _key, "The campaign is not in the voting phase.");
 
         withdrawRequests[_id][_key].yesVotes++;
-        if(withdrawRequests[_id][_key].yesVotes > campaign.noOfDonors / 2) {
+        if(withdrawRequests[_id][_key].yesVotes > campaign.donors.length / 2) {
             withdrawRequests[_id][_key].isExpired = true;
             campaign.updates.push(41);
         }
@@ -130,7 +131,7 @@ contract SmartFundRaise {
         require(campaign.updates[campaign.updates.length - 1] == _key, "The campaign is not in the voting phase.");
 
         withdrawRequests[_id][_key].noVotes++;
-        if(withdrawRequests[_id][_key].noVotes > campaign.noOfDonors / 2) { // 50% of donors vote no
+        if(withdrawRequests[_id][_key].noVotes > campaign.donors.length / 2) { // 50% of donors vote no
             withdrawRequests[_id][_key].isExpired = true;
             campaign.updates.push(42);
         }
@@ -155,27 +156,7 @@ contract SmartFundRaise {
             campaign.updates.push(5);
         }
     }
-     // Function to get all donors and their donation amounts for a specific project
-    // function getDonors(uint256 _projectId) external view returns (address[] memory, uint256[] memory) {
-    //     mapping(address => uint256) storage projectDonations = donations[_projectId];
-        
-    //     address[] memory donorAddresses = new address[](projectDonations.length);
-    //     uint256[] memory donationAmounts = new uint256[](projectDonations.length);
-
-    //     // Retrieve donor addresses and donation amounts directly into arrays
-    //     uint256 index = 0;
-    //     for (uint256 i = 0; i < projectDonations.length; i++) {
-    //         address donorAddress = projectDonations[i];
-    //         donorAddresses[index] = donorAddress;
-    //         donationAmounts[index] = projectDonations[donorAddress];
-    //         index++;
-    //     }
-
-    //     // Return the arrays containing donor addresses and donation amounts
-    //     return (donorAddresses, donationAmounts);
-    // }
-    
-
+ 
     function getCampaigns() public view returns (Campaign[] memory) {
         Campaign[] memory allCampaigns = new Campaign[](numberOfCampaigns);
 
@@ -186,6 +167,22 @@ contract SmartFundRaise {
         }
 
         return allCampaigns;
+    }
+
+    function getDonorsAndDonations(uint256 _id) public view returns (address[] memory, uint256[] memory) {
+        Campaign storage campaign = campaigns[_id];
+        address[] memory donors = new address[](campaign.donors.length);
+        uint256[] memory donationsArray = new uint256[](campaign.donors.length);
+
+        for(uint i = 0; i < campaign.donors.length; i++) {
+            address donor = campaign.donors[i];
+            uint256 donation = donations[_id][donor];
+
+            donors[i] = donor;
+            donationsArray[i] = donation;
+        }
+
+        return (donors, donationsArray);
     }
 
     function isDonor(uint256 _id) public view returns (bool) {
