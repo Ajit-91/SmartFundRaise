@@ -29,12 +29,7 @@ export function WithdrawRequest({ isLastestUpdate }) {
         const { amount, description, docLink } = form
         if (!amount || !description) return alert("amount and description are mandatory fields")
         if(docLink && !checkIfValidUrl(docLink)) return alert("Please provide a valid document link")
-        try {
-            await createWithdrawRequest(amount, description, docLink)
-        } catch (error) {
-            alert("Error while creating withdraw request")
-        }
-        // call contract function to withdraw
+        await createWithdrawRequest(amount, description, docLink)
     }
 
     return (

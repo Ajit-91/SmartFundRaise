@@ -41,12 +41,12 @@ const Step3 = ({isLastestUpdate, updateId}) => {
             <div className="w-1/2">Yes</div>
             <div className="w-1/2 text-right">{data.yesVotes}</div>
           </div>
-          <Progress className="w-full h-2" value={(data.yesVotes * 100)/data.totalVotes} />
-          <div className="flex items-center gap-4">
+          <Progress className="w-full h-2 mt-1 bg-[#4acd8d]" value={(data.yesVotes * 100)/data.totalVotes} />
+          <div className="flex items-center gap-4 mt-3">
             <div className="w-1/2">No</div>
             <div className="w-1/2 text-right">{data.noVotes}</div>
           </div>
-          <Progress className="w-full h-2" value={(data.noVotes * 100)/data.totalVotes} />
+          <Progress className="w-full h-2 mt-1 bg-red" value={(data.noVotes * 100)/data.totalVotes} />
         </CardContent>
         {ifDonor && (
           <>

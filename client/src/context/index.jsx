@@ -7,102 +7,125 @@ const StateContext = createContext();
 
 export const StateContextProvider = ({ children }) => {
   const { contract } = useContract(import.meta.env.VITE_CONTRACT_ADDRESS);
-  console.log({contract})
+  console.log({ contract })
   const { mutateAsync: createCampaign } = useContractWrite(contract, 'createCampaign');
 
   const address = useAddress();
   const connect = useMetamask();
 
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState(localStorage.getItem('Theme') || 'light');
   const [currentCampaign, setCurrentCampaign] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  console.log({currentCampaign})
+  console.log({ currentCampaign })
 
   const toggleTheme = () => {
+    localStorage.setItem('Theme', theme === 'light' ? 'dark' : 'light');
     setTheme(prev => prev === 'light' ? 'dark' : 'light')
   }
 
   useEffect(() => {
-    if(theme === "dark"){
+    if (theme === "dark") {
       document.documentElement.classList.add("dark");
-    }else{
+    } else {
       document.documentElement.classList.remove("dark");
     }
   }, [theme])
 
   const publishCampaign = async (form) => {
     try {
-      console.log({form})
+      console.log({ form })
+      setIsLoading(true);
       const data = await createCampaign({
-				args: [
-					address, // owner
-					form.title, // title
-					form.description, // description
-					form.target,
-					parseInt(new Date(form.deadline).getTime()/1000), // deadline,
-					form.image,
-				],
-			});
-
+        args: [
+          address, // owner
+          form.title, // title
+          form.description, // description
+          form.target,
+          parseInt(new Date(form.deadline).getTime() / 1000), // deadline,
+          form.image,
+        ],
+      });
       console.log("contract call success", data)
     } catch (error) {
       console.log("contract call failure", error)
+    } finally {
+      setIsLoading(false);
     }
   }
 
   const donate = async (pId, amount) => {
-    if(!amount) return alert("Please enter a valid amount to donate");
-    const data = await contract.call('donateToCampaign', [pId], { value: ethers.utils.parseEther(amount)});
-
-    return data;
+    try {
+      if (!amount) return alert("Please enter a valid amount to donate");
+      setIsLoading(true);
+      await contract.call('donateToCampaign', [pId], { value: ethers.utils.parseEther(amount) });
+    } catch (error) {
+      console.log("donate failure", error)
+      alert("Failed to donate")
+    } finally {
+      setIsLoading(false);
+    }
   }
 
 
   const createWithdrawRequest = async (amount, description, dockLink) => {
     try {
-       await contract.call('createWithdrawRequest', [
+      setIsLoading(true);
+      await contract.call('createWithdrawRequest', [
         currentCampaign.pId,
         ethers.utils.parseUnits(amount, 18),
-        // description,
+        description,
         dockLink
       ]);
-      
+
     } catch (error) {
       console.log("createWithdrawRequest failure", error)
-      throw error;
+      console.log({ msg: error.message })
+      alert("Failed to create withdraw request")
+    } finally {
+      setIsLoading(false);
     }
   }
 
   const voteYes = async (wrId) => {
     try {
+      setIsLoading(true);
       await contract.call('voteYes', [currentCampaign.pId, wrId]);
     } catch (error) {
       console.log("voteYes failure", error)
       alert("Failed to vote")
+    } finally {
+      setIsLoading(false);
     }
   }
 
   const voteNo = async (wrId) => {
     try {
+      setIsLoading(true);
       await contract.call('voteNo', [currentCampaign.pId, wrId]);
     } catch (error) {
       console.log("voteNo failure", error)
       alert("Failed to vote")
+    } finally {
+      setIsLoading(false);
     }
   }
 
   const withdraw = async () => {
     try {
+      setIsLoading(true);
       await contract.call('withdraw', [currentCampaign.pId]);
     } catch (error) {
       console.log("withdraw failure", error)
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   }
 
   const getCampaigns = async () => {
     const campaigns = await contract.call('getCampaigns');
-    console.log({campaigns})
+    console.log({ campaigns })
     const parsedCampaings = campaigns.map((campaign, i) => ({
       owner: campaign.owner,
       title: campaign.title,
@@ -134,7 +157,7 @@ export const StateContextProvider = ({ children }) => {
 
     const parsedDonations = [];
 
-    for(let i = 0; i < numberOfDonations; i++) {
+    for (let i = 0; i < numberOfDonations; i++) {
       parsedDonations.push({
         donator: donations[0][i],
         donation: ethers.utils.formatEther(donations[1][i].toString())
@@ -148,9 +171,9 @@ export const StateContextProvider = ({ children }) => {
 
   const isDonor = async () => {
     try {
-      let data =  await contract.call("donations", [currentCampaign.pId, address]);
+      let data = await contract.call("donations", [currentCampaign.pId, address]);
       data = ethers.BigNumber.from(data); // Convert to BigNumber
-      console.log({isDonor: data})
+      console.log({ isDonor: data })
       return !data.isZero(); // Check if data is not zero
     } catch (error) {
       console.log("isDonor failure", error)
@@ -161,7 +184,7 @@ export const StateContextProvider = ({ children }) => {
   const getWithdrawRequest = async (wrId) => {
     try {
       const data = await contract.call("withdrawRequests", [currentCampaign.pId, wrId]);
-      console.log({wrData : data})
+      console.log({ wrData: data })
       const yes = data.yesVotes.toNumber();
       const no = data.noVotes.toNumber();
       const total = yes + no;
@@ -181,7 +204,7 @@ export const StateContextProvider = ({ children }) => {
 
   return (
     <StateContext.Provider
-      value={{ 
+      value={{
         address,
         contract,
         connect,
@@ -201,6 +224,7 @@ export const StateContextProvider = ({ children }) => {
         voteNo,
         withdraw,
         getWithdrawRequest,
+        isLoading,
       }}
     >
       {children}

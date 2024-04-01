@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
     Card,
     CardContent,
@@ -13,6 +13,7 @@ import { WithdrawRequest } from './WithdrawRequest';
 
 const Step2 = ({isLastestUpdate}) => {
     const { isOwner } = useStateContext();
+    const [open, setOpen] = useState(false)
 
     return (
         <>
@@ -23,7 +24,13 @@ const Step2 = ({isLastestUpdate}) => {
             </CardHeader>
           {isOwner() && (
           <CardContent>
-                <WithdrawRequest isLastestUpdate={isLastestUpdate} />
+                {/* <CustomButton 
+                    disabled={!isLastestUpdate} 
+                    title="Create Withdrawl Request" 
+                    styles="bg-[#4acd8d] w-full" 
+                    handleClick={() => setOpen(true)}
+                /> */}
+                <WithdrawRequest open={open} setOpen={setOpen} isLastestUpdate={isLastestUpdate} />
             </CardContent>
             )}
         </Card>
