@@ -23,7 +23,7 @@ const Home = () => {
 
   return (
     <>
-      <div className="bg-[#1dc071] rounded-xl mb-5 py-12 px-4 text-center text-white">
+      <div className="bg-custom-primary rounded-xl mb-5 py-12 px-4 text-center text-white">
         <h1 className="text-4xl font-semibold mb-4">Discover Inspiring Campaigns</h1>
         <p className="text-lg mb-8">
           Explore a world of possibilities and make a difference. 

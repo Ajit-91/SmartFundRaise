@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ethers } from 'ethers';
-
+import { useNavigate } from 'react-router-dom';
 import { useStateContext } from '../context';
-import { CountBox, CustomButton, Loader } from '../components';
+import { CountBox, CustomButton } from '../components';
 import { calculateBarPercentage, daysLeft } from '../utils';
 import { thirdweb } from '../assets';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -13,7 +11,6 @@ import Update from '@/components/campaignUpdates/Update';
 const CampaignDetails = () => {
   const navigate = useNavigate();
   const { donate, getDonations, contract, address, currentCampaign } = useStateContext();
-  const [isLoading, setIsLoading] = useState(false);
   const [amount, setAmount] = useState('');
   const [donators, setDonators] = useState([]);
 
@@ -36,23 +33,12 @@ const CampaignDetails = () => {
   }, [contract, address])
 
   const handleDonate = async () => {
-    // add in try catch
     if(!amount) return alert("Please enter a valid amount to donate");
-    if(currentCampaign.deadline*1000 < Date.now()) return alert("Deadline has passed. You can't donate to this campaign now.")
-    if(currentCampaign.owner === address) return alert("You can't donate to your own campaign.");
-    if(currentCampaign.amountCollected + amount > currentCampaign.target) return alert("You can't donate more than the target amount.");
-    setIsLoading(true);
-
     await donate(currentCampaign.pId, amount);
-
-    navigate('/')
-    setIsLoading(false);
   }
 
   return (
     <div>
-      {isLoading && <Loader />}
-
       <div className="w-full flex md:flex-row flex-col mt-10 gap-[30px]">
         <div className="flex-1 flex-col">
           <img src={currentCampaign.image} alt="campaign" className="w-full h-[410px] object-cover rounded-xl" />
@@ -157,7 +143,7 @@ const CampaignDetails = () => {
               <CustomButton
                 btnType="button"
                 title="Fund Campaign"
-                styles="w-full bg-[#8c6dfd]"
+                styles="w-full bg-custom-primary"
                 handleClick={handleDonate}
               />
             </div>

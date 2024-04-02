@@ -12,7 +12,6 @@ const CreateCampaign = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { createCampaign } = useStateContext();
   const [form, setForm] = useState({
-    name: '',
     title: '',
     description: '',
     target: '', 
@@ -48,14 +47,6 @@ const CreateCampaign = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="w-full mt-[65px] flex flex-col gap-[30px]">
-        <div className="flex flex-wrap gap-[40px]">
-          <FormField 
-            labelName="Your Name *"
-            placeholder="John Doe"
-            inputType="text"
-            value={form.name}
-            handleChange={(e) => handleFormFieldChange('name', e)}
-          />
           <FormField 
             labelName="Campaign Title *"
             placeholder="Write a title"
@@ -63,8 +54,7 @@ const CreateCampaign = () => {
             value={form.title}
             handleChange={(e) => handleFormFieldChange('title', e)}
           />
-        </div>
-
+      
         <FormField 
             labelName="Story *"
             placeholder="Write your story"
@@ -102,7 +92,7 @@ const CreateCampaign = () => {
             <CustomButton 
               btnType="submit"
               title="Submit new campaign"
-              styles="bg-[#1dc071]"
+              styles="bg-custom-primary"
             />
           </div>
       </form>

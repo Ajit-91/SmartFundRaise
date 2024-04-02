@@ -1,6 +1,6 @@
 import React, { useContext, createContext, useState, useEffect } from 'react';
 
-import { useAddress, useContract, useMetamask, useContractWrite } from '@thirdweb-dev/react';
+import { useAddress, useContract, useMetamask, useContractWrite, TransactionError } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 
 const StateContext = createContext();
@@ -8,7 +8,7 @@ const StateContext = createContext();
 export const StateContextProvider = ({ children }) => {
   const { contract } = useContract(import.meta.env.VITE_CONTRACT_ADDRESS);
   console.log({ contract })
-  const { mutateAsync: createCampaign } = useContractWrite(contract, 'createCampaign');
+  // const { mutateAsync: createCampaign } = useContractWrite(contract, 'createCampaign');
 
   const address = useAddress();
   const connect = useMetamask();
@@ -20,8 +20,9 @@ export const StateContextProvider = ({ children }) => {
   console.log({ currentCampaign })
 
   const toggleTheme = () => {
-    localStorage.setItem('Theme', theme === 'light' ? 'dark' : 'light');
-    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+    const themeToSet = theme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('Theme', themeToSet);
+    setTheme(themeToSet)
   }
 
   useEffect(() => {
@@ -32,96 +33,146 @@ export const StateContextProvider = ({ children }) => {
     }
   }, [theme])
 
-  const publishCampaign = async (form) => {
+  const handleError = (fun) => async () => {
     try {
-      console.log({ form })
       setIsLoading(true);
-      const data = await createCampaign({
-        args: [
-          address, // owner
-          form.title, // title
-          form.description, // description
-          form.target,
-          parseInt(new Date(form.deadline).getTime() / 1000), // deadline,
-          form.image,
-        ],
-      });
-      console.log("contract call success", data)
+      await fun();
     } catch (error) {
-      console.log("contract call failure", error)
+      console.log("Transaction failed : ", error)
+      alert(error?.reason || "Something went wrong")
     } finally {
       setIsLoading(false);
     }
   }
+  // const publishCampaign = async (form) => {
+  //   try {
+  //     console.log({ form })
+  //     setIsLoading(true);
+  //     const data = await createCampaign({
+  //       args: [
+  //         address, // owner
+  //         form.title, // title
+  //         form.description, // description
+  //         form.target,
+  //         parseInt(new Date(form.deadline).getTime() / 1000), // deadline,
+  //         form.image,
+  //       ],
+  //     });
+  //     console.log("contract call success", data)
+  //   } catch (error) {
+  //     console.log("contract call failure", error)
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
 
-  const donate = async (pId, amount) => {
-    try {
-      if (!amount) return alert("Please enter a valid amount to donate");
-      setIsLoading(true);
-      await contract.call('donateToCampaign', [pId], { value: ethers.utils.parseEther(amount) });
-    } catch (error) {
-      console.log("donate failure", error)
-      alert("Failed to donate")
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const publishCampaign = async (form) => handleError(async () => {
+    await contract.call('createCampaign', [
+      address, // owner
+      form.title, // title
+      form.description, // description
+      form.target,
+      parseInt(new Date(form.deadline).getTime() / 1000), // deadline,
+      form.image,
+    ]);
+  })()
 
 
-  const createWithdrawRequest = async (amount, description, dockLink) => {
-    try {
-      setIsLoading(true);
-      await contract.call('createWithdrawRequest', [
-        currentCampaign.pId,
-        ethers.utils.parseUnits(amount, 18),
-        description,
-        dockLink
-      ]);
+  // const donate = async (pId, amount) => {
+  //   try {
+  //     if (!amount) return alert("Please enter a valid amount to donate");
+  //     setIsLoading(true);
+  //     await contract.call('donateToCampaign', [pId], { value: ethers.utils.parseEther(amount) });
+  //   } catch (error) {
+  //     const errorReason = error?.reason;
+  //     console.log("donate failure", error)
+  //     alert("Failed to donate : "+ errorReason)
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
 
-    } catch (error) {
-      console.log("createWithdrawRequest failure", error)
-      console.log({ msg: error.message })
-      alert("Failed to create withdraw request")
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const donate = async (pId, amount) => handleError(async () => {
+    await contract.call('donateToCampaign', [pId], { value: ethers.utils.parseEther(amount) });
+  })();
 
-  const voteYes = async (wrId) => {
-    try {
-      setIsLoading(true);
-      await contract.call('voteYes', [currentCampaign.pId, wrId]);
-    } catch (error) {
-      console.log("voteYes failure", error)
-      alert("Failed to vote")
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  // const createWithdrawRequest = async (amount, description, dockLink) => {
+  //   try {
+  //     setIsLoading(true);
+  //     await contract.call('createWithdrawRequest', [
+  //       currentCampaign.pId,
+  //       ethers.utils.parseUnits(amount, 18),
+  //       description,
+  //       dockLink
+  //     ]);
 
-  const voteNo = async (wrId) => {
-    try {
-      setIsLoading(true);
-      await contract.call('voteNo', [currentCampaign.pId, wrId]);
-    } catch (error) {
-      console.log("voteNo failure", error)
-      alert("Failed to vote")
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  //   } catch (error) {
+  //     console.log("createWithdrawRequest failure", error)
+  //     console.log({ msg: error.message })
+  //     alert("Failed to create withdraw request")
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
 
-  const withdraw = async () => {
-    try {
-      setIsLoading(true);
-      await contract.call('withdraw', [currentCampaign.pId]);
-    } catch (error) {
-      console.log("withdraw failure", error)
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const createWithdrawRequest = async (amount, description, dockLink) => handleError(async () => {
+    await contract.call('createWithdrawRequest', [
+      currentCampaign.pId,
+      ethers.utils.parseUnits(amount, 18),
+      description,
+      dockLink
+    ]);
+  })()
+
+
+  // const voteYes = async (wrId) => {
+  //   try {
+  //     setIsLoading(true);
+  //     await contract.call('voteYes', [currentCampaign.pId, wrId]);
+  //   } catch (error) {
+  //     console.log("voteYes failure", error)
+  //     alert("Failed to vote")
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
+  const voteYes = async (wrId) => handleError(async () => {
+    await contract.call('voteYes', [currentCampaign.pId, wrId]);
+  })()
+
+
+  // const voteNo = async (wrId) => {
+  //   try {
+  //     setIsLoading(true);
+  //     await contract.call('voteNo', [currentCampaign.pId, wrId]);
+  //   } catch (error) {
+  //     console.log("voteNo failure", error)
+  //     alert("Failed to vote")
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
+  const voteNo = async (wrId) => handleError(async () => {
+    await contract.call('voteNo', [currentCampaign.pId, wrId]);
+  })()
+
+  // const withdraw = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     await contract.call('withdraw', [currentCampaign.pId]);
+  //   } catch (error) {
+  //     console.log("withdraw failure", error)
+  //     throw error;
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
+  const withdraw = async () => handleError(async () => {
+    await contract.call('withdraw', [currentCampaign.pId]);
+  })()
 
   const getCampaigns = async () => {
     const campaigns = await contract.call('getCampaigns');

@@ -17,9 +17,9 @@ module.exports = {
       },
     },
     extend: {
-      fontFamily: {
-        epilogue: ['Epilogue', 'sans-serif'],
-      },
+      // fontFamily: {
+      //   epilogue: ['Epilogue', 'sans-serif'],
+      // },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -54,6 +54,10 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        custom: {
+          primary: "#8c6dfd", // 8c6dfd
+          secondary: "#1dc071"
+        }
       },
       borderRadius: {
         lg: "var(--radius)",
