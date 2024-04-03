@@ -1,15 +1,14 @@
 import React from 'react'
+import { Button } from './ui/button'
 
-const CustomButton = ({ btnType, title, handleClick, styles, ...rest }) => {
+const CustomButton = ({ children, styles, ...rest }) => {
   return (
-    <button
+    <Button
       {...rest}
-      type={btnType}
-      className={`font-epilogue font-semibold text-[16px] leading-[26px] text-white min-h-[52px] px-4 rounded-[10px] ${styles} disabled:bg-[#b2b3bd] disabled:cursor-not-allowed disabled:opacity-80`}
-      onClick={handleClick}
+      className={`font-semibold text-[16px] text-white p-3 rounded-lg ${styles} `}
     >
-      {title}
-    </button>
+      {children}
+    </Button>
   )
 }
 

@@ -8,21 +8,21 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { CustomButton } from '..'
 import { useStateContext } from '@/context'
+import { Button } from '../ui/button'
 
-const Step3 = ({isLastestUpdate, updateId}) => {
+const Step3 = ({ isLastestUpdate, updateId }) => {
   const { isDonor, getWithdrawRequest, voteYes, voteNo } = useStateContext();
   const [ifDonor, setIfDonor] = useState(false)
   const [data, setData] = useState({});
-  console.log({step3D : data})
+  console.log({ step3D: data })
   useEffect(() => {
     (async () => {
-      if(updateId) {
+      if (updateId) {
         getWithdrawRequest(updateId).then((res) => setData(res));
         const res = await isDonor()
         setIfDonor(res)
-        }
+      }
     })()
   }, [updateId, getWithdrawRequest])
 
@@ -35,26 +35,39 @@ const Step3 = ({isLastestUpdate, updateId}) => {
         </CardHeader>
         <CardContent>
           <p>Description for request</p>
-          <a href={data.docLink} target='_blank' className="text-[#4acd8d]">Doc link</a>
+          {data.docLink && <a href={data.docLink} target='_blank' className="text-custom-primary">Doc link</a>}
           <CardDescription className="text-center mt-2">Total votes: {data.totalVotes}</CardDescription>
           <div className="flex items-center gap-4">
             <div className="w-1/2">Yes</div>
             <div className="w-1/2 text-right">{data.yesVotes}</div>
           </div>
-          <Progress className="w-full h-2 mt-1 bg-[#4acd8d]" value={(data.yesVotes * 100)/data.totalVotes} />
+          <Progress className="w-full h-2 mt-1 border border-primary-foreground" value={(data.yesVotes * 100) / data.totalVotes} />
           <div className="flex items-center gap-4 mt-3">
             <div className="w-1/2">No</div>
             <div className="w-1/2 text-right">{data.noVotes}</div>
           </div>
-          <Progress className="w-full h-2 mt-1 bg-red" value={(data.noVotes * 100)/data.totalVotes} />
+          <Progress className="w-full h-2 mt-1 border border-primary-foreground" value={(data.noVotes * 100) / data.totalVotes} />
         </CardContent>
         {ifDonor && (
           <>
-          {/* <CardDescription>Tip for donors: Always check the request details before voting</CardDescription> */}
-        <CardFooter className="flex gap-4">
-          <CustomButton handleClick={() => voteYes(updateId)} disabled={!isLastestUpdate} title="Vote Yes" styles="bg-[#4acd8d] w-full" />
-          <CustomButton handleClick={() => voteNo(updateId)} disabled={!isLastestUpdate} title="Vote No" styles="bg-[#4acd8d] w-full" />
-        </CardFooter>
+            {/* <CardDescription>Tip for donors: Always check the request details before voting</CardDescription> */}
+            <CardFooter className="flex gap-4">
+              <Button
+                onClick={() => voteYes(updateId)}
+                disabled={!isLastestUpdate}
+                className="bg-custom-primary hover:bg-custom-primary-dark text-white w-full"
+              >
+                Vote Yes
+              </Button>
+
+              <Button
+                onClick={() => voteNo(updateId)}
+                disabled={!isLastestUpdate}
+                className="bg-custom-primary hover:bg-custom-primary-dark text-white w-full"
+              >
+                Vote No
+              </Button>
+            </CardFooter>
           </>
         )}
       </Card>

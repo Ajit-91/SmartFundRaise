@@ -7,8 +7,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { CustomButton } from '..'
 import { useStateContext } from '@/context';
+import { Button } from '../ui/button';
 
 const Step4_1 = ({ isLastestUpdate }) => {
     const { isOwner, withdraw } = useStateContext();
@@ -22,7 +22,12 @@ const Step4_1 = ({ isLastestUpdate }) => {
                 </CardHeader>
                 {isOwner() && (
                     <CardContent>
-                        <CustomButton handleClick={withdraw} disabled={!isLastestUpdate} title="Withdraw" styles="bg-[#4acd8d] w-full" />
+                        <Button
+                            onClick={withdraw}
+                            disabled={!isLastestUpdate}
+                            className="bg-custom-primary hover:bg-custom-primary-dark w-full text-white" >
+                            Withdraw
+                        </Button>
                     </CardContent>
                 )}
             </Card>

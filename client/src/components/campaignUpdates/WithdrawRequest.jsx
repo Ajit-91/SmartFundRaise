@@ -8,9 +8,10 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { useState } from "react"
-import { CustomButton, FormField } from ".."
+import { FormField } from ".."
 import { checkIfValidUrl } from "@/utils"
 import { useStateContext } from "@/context"
+import { Button } from "../ui/button"
 
 export function WithdrawRequest({ isLastestUpdate }) {
     const {createWithdrawRequest} = useStateContext()
@@ -34,8 +35,13 @@ export function WithdrawRequest({ isLastestUpdate }) {
 
     return (
         <Dialog>
-            <DialogTrigger className="w-full">
-                <CustomButton disabled={!isLastestUpdate} title="Create Withdrawl Request" styles="bg-[#4acd8d] w-full" />
+            <DialogTrigger asChild className="w-full">
+                <Button 
+                    disabled={!isLastestUpdate} 
+                    className="bg-custom-primary w-full hover:bg-custom-primary-dark text-white"
+                >
+                    Create Withdrawl Request
+                </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[550px]">
                 <form onSubmit={handleSubmit}>
@@ -67,15 +73,17 @@ export function WithdrawRequest({ isLastestUpdate }) {
                         placeholder="https://exampleDocumentLink.com"
                         inputType="text"
                         value={form.docLink}
+                        required={false}
                         handleChange={(e) => handleChange(e, 'docLink')}
                     />
                     <br/>
                     <DialogFooter>
-                        <CustomButton
-                            btnType="submit"
-                            title="Submit request"
-                            styles="bg-[#1dc071]"
-                        />
+                        <Button
+                            type="submit"
+                            className="bg-custom-primary hover:bg-custom-primary-dark text-white"
+                        >
+                            Submit Request
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

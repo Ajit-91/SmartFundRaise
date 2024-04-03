@@ -2,21 +2,21 @@ import React, { useContext, createContext, useState, useEffect } from 'react';
 
 import { useAddress, useContract, useMetamask, useContractWrite, TransactionError } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
+import { useToast } from "@/components/ui/use-toast"
 
 const StateContext = createContext();
 
 export const StateContextProvider = ({ children }) => {
   const { contract } = useContract(import.meta.env.VITE_CONTRACT_ADDRESS);
-  console.log({ contract })
-  // const { mutateAsync: createCampaign } = useContractWrite(contract, 'createCampaign');
-
   const address = useAddress();
   const connect = useMetamask();
-
+  const { toast } = useToast()
+  
   const [theme, setTheme] = useState(localStorage.getItem('Theme') || 'light');
   const [currentCampaign, setCurrentCampaign] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-
+  
+  console.log({ contract })
   console.log({ address })
 
   const toggleTheme = () => {
@@ -39,7 +39,11 @@ export const StateContextProvider = ({ children }) => {
       await fun();
     } catch (error) {
       console.log("Transaction failed : ", error)
-      alert(error?.reason || "Something went wrong")
+      toast({
+        variant: "destructive", 
+        title: "Transaction failed",
+        description: error?.reason || "Something went wrong",
+      })
     } finally {
       setIsLoading(false);
     }
@@ -75,6 +79,10 @@ export const StateContextProvider = ({ children }) => {
       parseInt(new Date(form.deadline).getTime() / 1000), // deadline,
       form.image,
     ]);
+    toast({
+      title: "Campaign created successfully",
+      description: "Your campaign has been created successfully",
+    })
   })()
 
 
@@ -94,6 +102,10 @@ export const StateContextProvider = ({ children }) => {
 
   const donate = async (pId, amount) => handleError(async () => {
     await contract.call('donateToCampaign', [pId], { value: ethers.utils.parseEther(amount) });
+    toast({
+      title: "Donation successful",
+      description: "Your donation has been made successfully",
+    })
   })();
 
   // const createWithdrawRequest = async (amount, description, dockLink) => {
@@ -122,6 +134,10 @@ export const StateContextProvider = ({ children }) => {
       description,
       dockLink
     ]);
+    toast({
+      title: "Withdraw request created",
+      description: "Your withdraw request has been created successfully",
+    })
   })()
 
 
@@ -139,6 +155,10 @@ export const StateContextProvider = ({ children }) => {
 
   const voteYes = async (wrId) => handleError(async () => {
     await contract.call('voteYes', [currentCampaign.pId, wrId]);
+    toast({
+      title: "Vote successful",
+      description: "Your vote has been recorded successfully",
+    })
   })()
 
 
@@ -156,6 +176,10 @@ export const StateContextProvider = ({ children }) => {
 
   const voteNo = async (wrId) => handleError(async () => {
     await contract.call('voteNo', [currentCampaign.pId, wrId]);
+    toast({
+      title: "Vote successful",
+      description: "Your vote has been recorded successfully",
+    })
   })()
 
   // const withdraw = async () => {
@@ -172,6 +196,10 @@ export const StateContextProvider = ({ children }) => {
 
   const withdraw = async () => handleError(async () => {
     await contract.call('withdraw', [currentCampaign.pId]);
+    toast({
+      title: "Withdraw successful",
+      description: "Your withdraw has been made successfully",
+    })
   })()
 
   const getCampaigns = async () => {

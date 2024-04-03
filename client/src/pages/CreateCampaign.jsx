@@ -4,8 +4,10 @@ import { ethers } from 'ethers';
 
 import { useStateContext } from '../context';
 import { money } from '../assets';
-import { CustomButton, FormField, Loader } from '../components';
+import { FormField, Loader } from '../components';
 import { checkIfImage } from '../utils';
+import { Send } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const CreateCampaign = () => {
   const navigate = useNavigate();
@@ -89,11 +91,12 @@ const CreateCampaign = () => {
           />
 
           <div className="flex justify-center items-center mt-[40px]">
-            <CustomButton 
-              btnType="submit"
-              title="Submit new campaign"
-              styles="bg-custom-primary"
-            />
+            <Button
+              className="bg-custom-primary hover:bg-custom-primary-dark text-white"
+            >
+              <Send size={20} className='mr-3' />
+              Submit new campaign
+            </Button>
           </div>
       </form>
     </div>

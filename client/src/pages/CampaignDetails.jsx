@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useStateContext } from '../context';
-import { CountBox, CustomButton } from '../components';
+import { CountBox } from '../components';
 import { calculateBarPercentage, daysLeft } from '../utils';
-import { thirdweb } from '../assets';
+import { metamask } from '../assets';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Update from '@/components/campaignUpdates/Update';
+import { Button } from '@/components/ui/button';
+import { HandCoins } from 'lucide-react';
 
 
 const CampaignDetails = () => {
@@ -16,7 +18,7 @@ const CampaignDetails = () => {
 
   useEffect(() => {
     if(!currentCampaign || Object.keys(currentCampaign).length === 0) return navigate('/')
-  }, [])
+  }, [currentCampaign])
 
 
   const remainingDays = daysLeft(currentCampaign.deadline);
@@ -43,7 +45,7 @@ const CampaignDetails = () => {
         <div className="flex-1 flex-col">
           <img src={currentCampaign.image} alt="campaign" className="w-full h-[410px] object-cover rounded-xl" />
           <div className="relative w-full h-[5px] bg-[#3a3a43] mt-2">
-            <div className="absolute h-full bg-[#4acd8d]" style={{ width: `${calculateBarPercentage(currentCampaign.target, currentCampaign.amountCollected)}%`, maxWidth: '100%' }}>
+            <div className="absolute h-full bg-custom-primary" style={{ width: `${calculateBarPercentage(currentCampaign.target, currentCampaign.amountCollected)}%`, maxWidth: '100%' }}>
             </div>
           </div>
         </div>
@@ -62,11 +64,11 @@ const CampaignDetails = () => {
 
             <div className="mt-[20px] flex flex-row items-center flex-wrap gap-[14px]">
               <div className="w-[52px] h-[52px] flex items-center justify-center rounded-full bg-white dark:bg-[#2c2f32] cursor-pointer">
-                <img src={thirdweb} alt="user" className="w-[60%] h-[60%] object-contain" />
+                <img src={metamask} alt="user" className="w-[60%] h-[60%] object-contain" />
               </div>
               <div>
                 <h4 className="font-epilogue font-semibold text-[14px] dark:text-white break-all">{currentCampaign.owner}</h4>
-                <p className="mt-[4px] font-epilogue font-normal text-[12px] text-[#808191]">10 Campaigns</p>
+                <p className="mt-[4px] font-epilogue font-normal text-[12px] text-[#808191]">Owner</p>
               </div>
             </div>
           </div>
@@ -94,13 +96,6 @@ const CampaignDetails = () => {
             </TabsContent>
           </Tabs>
 
-          {/* <div>
-            <h4 className="font-epilogue font-semibold text-[18px] dark:text-white uppercase">Story</h4>
-
-            <div className="mt-[20px]">
-              <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">{currentCampaign.description}</p>
-            </div>
-          </div> */}
 
           <div>
             <h4 className="font-epilogue font-semibold text-[18px] dark:text-white uppercase">Donators</h4>
@@ -109,7 +104,7 @@ const CampaignDetails = () => {
               {donators.length > 0 ? donators.map((item, index) => (
                 <div key={`${item.donator}-${index}`} className="flex justify-between items-center gap-4">
                   <p className="font-epilogue font-normal text-[16px] dark:text-[#b2b3bd] leading-[26px] break-ll">{index + 1}. {item.donator}</p>
-                  <p className="font-epilogue font-normal text-[16px] dark:text-[#808191] leading-[26px] break-ll">{item.donation}</p>
+                  <p className="font-epilogue font-normal text-[16px] dark:text-[#808191] leading-[26px] break-ll">{item.donation} ETH</p>
                 </div>
               )) : (
                 <p className="font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] text-justify">No donators yet. Be the first one!</p>
@@ -140,12 +135,13 @@ const CampaignDetails = () => {
                 <p className="mt-[20px] font-epilogue font-normal leading-[22px] text-[#808191]">Support the project for no reward, just because it speaks to you.</p>
               </div>
 
-              <CustomButton
-                btnType="button"
-                title="Fund Campaign"
-                styles="w-full bg-custom-primary"
-                handleClick={handleDonate}
-              />
+              <Button
+                className="w-full bg-custom-primary hover:bg-custom-primary-dark min-h-[52px] text-[16px] text-white"
+                onClick={handleDonate}
+              >
+                <HandCoins size={25} className='mr-3' />
+                Fund Campaign
+              </Button>
             </div>
           </div>
         </div>

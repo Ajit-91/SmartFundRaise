@@ -3,11 +3,9 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { CustomButton } from '..'
 import { useStateContext } from '@/context';
 import { WithdrawRequest } from './WithdrawRequest';
 
@@ -24,12 +22,6 @@ const Step2 = ({isLastestUpdate}) => {
             </CardHeader>
           {isOwner() && (
           <CardContent>
-                {/* <CustomButton 
-                    disabled={!isLastestUpdate} 
-                    title="Create Withdrawl Request" 
-                    styles="bg-[#4acd8d] w-full" 
-                    handleClick={() => setOpen(true)}
-                /> */}
                 <WithdrawRequest open={open} setOpen={setOpen} isLastestUpdate={isLastestUpdate} />
             </CardContent>
             )}
