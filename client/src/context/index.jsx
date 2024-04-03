@@ -17,7 +17,7 @@ export const StateContextProvider = ({ children }) => {
   const [currentCampaign, setCurrentCampaign] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log({ currentCampaign })
+  console.log({ address })
 
   const toggleTheme = () => {
     const themeToSet = theme === 'light' ? 'dark' : 'light';

@@ -12,6 +12,7 @@ import menu from './menu.svg';
 import money from './money.svg';
 import loader from './loader.svg';
 import thirdweb from './thirdweb.png';
+import metamask from './metamask-logo.png';
 import moon from './moon.svg';
 
 export {
@@ -30,4 +31,5 @@ export {
   money,
   loader,
   thirdweb,
+  metamask,
 };
