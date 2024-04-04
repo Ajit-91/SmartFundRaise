@@ -10,7 +10,7 @@ import Step6 from './Step6'
 const Update = ({updateId, isLastestUpdate}) => {
   console.log({updateId})
   return (
-    <div className='w-[50%]'>
+    <div className='w-[100%] lg:w-[70%]'>
         {updateId === 1 ? <Step1 isLastestUpdate={isLastestUpdate} /> :
         updateId === 2 ? <Step2 isLastestUpdate={isLastestUpdate} /> :
         updateId === 41 ? <Step4_1 isLastestUpdate={isLastestUpdate} /> :

@@ -1,6 +1,6 @@
 import React, { useContext, createContext, useState, useEffect } from 'react';
 
-import { useAddress, useContract, useMetamask, useContractWrite, TransactionError } from '@thirdweb-dev/react';
+import { useAddress, useContract, useMetamask } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 import { useToast } from "@/components/ui/use-toast"
 
@@ -18,6 +18,7 @@ export const StateContextProvider = ({ children }) => {
   
   console.log({ contract })
   console.log({ address })
+  console.log({ currentCampaign })
 
   const toggleTheme = () => {
     const themeToSet = theme === 'light' ? 'dark' : 'light';
@@ -69,6 +70,7 @@ export const StateContextProvider = ({ children }) => {
   //     setIsLoading(false);
   //   }
   // }
+  
 
   const publishCampaign = async (form) => handleError(async () => {
     await contract.call('createCampaign', [
@@ -86,6 +88,24 @@ export const StateContextProvider = ({ children }) => {
   })()
 
 
+
+  
+  const getCampaignById = async (pId) => {
+    const campaign = await contract.call('campaigns', [currentCampaign.pId]);
+    console.log({ campaign })
+    return {
+      owner: campaign.owner,
+      title: campaign.title,
+      description: campaign.description,
+      target: ethers.utils.formatEther(campaign.target.toString()),
+      deadline: campaign.deadline.toNumber(),
+      amountCollected: ethers.utils.formatEther(campaign.amountCollected.toString()),
+      image: campaign.image,
+      updates: campaign.updates,
+      pId
+    }
+  }
+
   // const donate = async (pId, amount) => {
   //   try {
   //     if (!amount) return alert("Please enter a valid amount to donate");
@@ -102,6 +122,8 @@ export const StateContextProvider = ({ children }) => {
 
   const donate = async (pId, amount) => handleError(async () => {
     await contract.call('donateToCampaign', [pId], { value: ethers.utils.parseEther(amount) });
+    const updatedCampaign = await getCampaignById(pId);
+    setCurrentCampaign(updatedCampaign);
     toast({
       title: "Donation successful",
       description: "Your donation has been made successfully",
@@ -134,6 +156,8 @@ export const StateContextProvider = ({ children }) => {
       description,
       dockLink
     ]);
+    const updatedCampaign = await getCampaignById(currentCampaign.pId);
+    setCurrentCampaign(updatedCampaign);
     toast({
       title: "Withdraw request created",
       description: "Your withdraw request has been created successfully",
@@ -155,6 +179,8 @@ export const StateContextProvider = ({ children }) => {
 
   const voteYes = async (wrId) => handleError(async () => {
     await contract.call('voteYes', [currentCampaign.pId, wrId]);
+    const updatedCampaign = await getCampaignById(currentCampaign.pId);
+    setCurrentCampaign(updatedCampaign);
     toast({
       title: "Vote successful",
       description: "Your vote has been recorded successfully",
@@ -176,6 +202,8 @@ export const StateContextProvider = ({ children }) => {
 
   const voteNo = async (wrId) => handleError(async () => {
     await contract.call('voteNo', [currentCampaign.pId, wrId]);
+    const updatedCampaign = await getCampaignById(currentCampaign.pId);
+    setCurrentCampaign(updatedCampaign);
     toast({
       title: "Vote successful",
       description: "Your vote has been recorded successfully",
@@ -196,11 +224,14 @@ export const StateContextProvider = ({ children }) => {
 
   const withdraw = async () => handleError(async () => {
     await contract.call('withdraw', [currentCampaign.pId]);
+    const updatedCampaign = await getCampaignById(currentCampaign.pId);
+    setCurrentCampaign(updatedCampaign);
     toast({
       title: "Withdraw successful",
       description: "Your withdraw has been made successfully",
     })
   })()
+
 
   const getCampaigns = async () => {
     const campaigns = await contract.call('getCampaigns');
@@ -222,12 +253,10 @@ export const StateContextProvider = ({ children }) => {
 
   const getUserCampaigns = async () => {
     const allCampaigns = await getCampaigns();
-
     const filteredCampaigns = allCampaigns.filter((campaign) => campaign.owner === address);
 
     return filteredCampaigns;
   }
-
 
 
   const getDonations = async (pId) => {

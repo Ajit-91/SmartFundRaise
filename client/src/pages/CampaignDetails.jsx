@@ -32,7 +32,7 @@ const CampaignDetails = () => {
 
   useEffect(() => {
     if (contract) fetchDonators();
-  }, [contract, address])
+  }, [contract, address, currentCampaign])
 
   const handleDonate = async () => {
     if(!amount) return alert("Please enter a valid amount to donate");
@@ -84,7 +84,7 @@ const CampaignDetails = () => {
             </div>
             </TabsContent>
             <TabsContent value="updates">
-              <div className='flex-col justify-center  w-full'>
+              <div className='flex flex-col justify-center w-full'>
                 {currentCampaign?.updates && currentCampaign.updates.map((update, index) => (
                     <Update 
                       key={index} 

@@ -27,7 +27,13 @@ contract SmartFundRaise {
         bool isExpired;
     }
 
+    struct Comment {
+        address commenter;
+        string comment;
+        uint256 timestamp;
+    }
 
+    mapping(uint256 => Comment[]) public comments;
     mapping(uint256 => Campaign) public campaigns;
     mapping(uint256 => mapping(address => uint256)) public donations;
     mapping(uint256 => mapping(uint256 => WithdrawRequest)) public withdrawRequests;
@@ -76,22 +82,21 @@ contract SmartFundRaise {
         }
     }
 
-    // function claimRefund(uint256 _id) public  {
+    function claimRefund(uint256 _id) public  {
+        Campaign storage campaign = campaigns[_id];
+        require(campaign.deadline < block.timestamp, "The deadline has not been reached yet.");
+        require(campaign.amountCollected < campaign.target, "The target has been reached, you cannot claim refund now.");
+        require(donations[_id][msg.sender] > 0, "You have not donated to this campaign.");
 
-    //     Campaign storage campaign = campaigns[_id];
-    //     require(campaign.deadline < block.timestamp, "The deadline has not been reached yet.");
-    //     require(campaign.amountCollected < campaign.target, "The target has been reached.");
-    //     require(donations[_id][msg.sender] > 0, "You have not donated to this campaign.");
+        uint256 amount = donations[_id][msg.sender];
+        donations[_id][msg.sender] = 0;
 
-    //     uint256 amount = donations[_id][msg.sender];
-    //     donations[_id][msg.sender] = 0;
+        (bool sent,) = payable(msg.sender).call{value: amount}("");
 
-    //     (bool sent,) = payable(msg.sender).call{value: amount}("");
-
-    //     if(sent) {
-    //         campaign.amountCollected = campaign.amountCollected - amount;
-    //     }
-    // }
+        if(sent) {
+            campaign.amountCollected = campaign.amountCollected - amount;
+        }
+    }
 
     function createWithdrawRequest(uint256 _id, uint256 _amount, string memory _description,  string memory _docLink) public {
         Campaign storage campaign = campaigns[_id];
@@ -159,6 +164,15 @@ contract SmartFundRaise {
             campaign.updates.push(5);
         }
     }
+
+
+    function addComment(uint256 _id, string memory _comment) public {
+        comments[_id].push(Comment({
+            commenter: msg.sender,
+            comment: _comment,
+            timestamp: block.timestamp
+        }));
+    }
  
     function getCampaigns() public view returns (Campaign[] memory) {
         Campaign[] memory allCampaigns = new Campaign[](numberOfCampaigns);
@@ -170,6 +184,11 @@ contract SmartFundRaise {
         }
 
         return allCampaigns;
+    }
+
+    // function to get the campaingn details by id
+    function getCampaign(uint256 _id) public view returns (Campaign memory) {
+        return campaigns[_id];
     }
 
     function getDonorsAndDonations(uint256 _id) public view returns (address[] memory, uint256[] memory) {
@@ -190,6 +209,10 @@ contract SmartFundRaise {
 
     function isDonor(uint256 _id) public view returns (bool) {
         return donations[_id][msg.sender] > 0;
+    }
+
+    function getComments(uint256 _id) public view returns (Comment[] memory) {
+        return comments[_id];
     }
 }
 

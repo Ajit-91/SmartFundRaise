@@ -57,7 +57,9 @@ module.exports = {
         custom: {
           primary: {
             DEFAULT : "#8c6dfd",
-            dark: "#745bd1"
+            dark: "#745bd1",
+            light: "#a97cff",
+            darker: "#635597"
           },
           secondary: "#1dc071"
         }
