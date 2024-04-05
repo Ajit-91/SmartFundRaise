@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 
 contract SmartFundRaise {
     struct Campaign {
-        // uint256 id;
+        uint256 id;
         address owner;
         string title;
         string description;
@@ -19,31 +19,45 @@ contract SmartFundRaise {
     }
 
     struct WithdrawRequest {
+        uint256 id;
         uint256 yesVotes;
         uint256 noVotes;
         uint256 amount;
         string description;
         string docLink;
-        bool isExpired;
+        bool isActive;
     }
 
     struct Comment {
+        uint256 id;
         address commenter;
         string comment;
         uint256 timestamp;
     }
 
-    mapping(uint256 => Comment[]) public comments;
-    mapping(uint256 => Campaign) public campaigns;
-    mapping(uint256 => mapping(address => uint256)) public donations;
+    mapping(uint256 => Comment[]) private comments;
+    mapping(uint256 => Campaign) private campaigns;
+    mapping(uint256 => mapping(address => uint256)) private donations;
     mapping(uint256 => mapping(uint256 => WithdrawRequest)) public withdrawRequests;
-    uint256 public numberOfCampaigns = 0;
+    uint256 private numberOfCampaigns = 0;
+
+    //  modifers - onlyOwner and onlyDonor
+    modifier onlyOwner(uint256 _id) {
+        require(campaigns[_id].owner == msg.sender, "You are not the owner of this campaign.");
+        _;
+    }
+
+    modifier onlyDonor(uint256 _id) {
+        require(donations[_id][msg.sender] > 0, "You are not a donor for this campaign.");
+        _;
+    }
 
     function createCampaign(address _owner, string memory _title, string memory _description, uint256 _target, uint256 _deadline, string memory _image) public returns (uint256) {
         Campaign storage campaign = campaigns[numberOfCampaigns];
-
         require(_deadline > block.timestamp, "The deadline should be a date in the future.");
+        require(_target > 0, "The target amount should be greater than 0.");
 
+        campaign.id = numberOfCampaigns;
         campaign.owner = _owner;
         campaign.title = _title;
         campaign.description = _description;
@@ -82,11 +96,11 @@ contract SmartFundRaise {
         }
     }
 
-    function claimRefund(uint256 _id) public  {
+    function claimRefund(uint256 _id) public onlyDonor(_id)  {
         Campaign storage campaign = campaigns[_id];
+        require(campaign.amountCollected < campaign.target, "The target amount is collected, you cannot claim refund now.");
         require(campaign.deadline < block.timestamp, "The deadline has not been reached yet.");
-        require(campaign.amountCollected < campaign.target, "The target has been reached, you cannot claim refund now.");
-        require(donations[_id][msg.sender] > 0, "You have not donated to this campaign.");
+        // require(donations[_id][msg.sender] > 0, "You have not donated to this campaign.");
 
         uint256 amount = donations[_id][msg.sender];
         donations[_id][msg.sender] = 0;
@@ -98,57 +112,58 @@ contract SmartFundRaise {
         }
     }
 
-    function createWithdrawRequest(uint256 _id, uint256 _amount, string memory _description,  string memory _docLink) public {
+    function createWithdrawRequest(uint256 _id, uint256 _amount, string memory _description,  string memory _docLink) public onlyOwner(_id) {
         Campaign storage campaign = campaigns[_id];
-        require(campaign.owner == msg.sender, "You are not the owner of this campaign.");
-        require(campaign.amountCollected >= campaign.target, "Target amount is not collected yet, cannot initiate withdrawl process.");
+        // require(campaign.owner == msg.sender, "You are not the owner of this campaign.");
+        require(campaign.amountCollected >= campaign.target, "Target amount is not collected yet, you cannot create withdrawal request right now.");
         uint256 latestUpdate = campaign.updates[campaign.updates.length - 1];
-        require(latestUpdate == 2 || latestUpdate == 42|| latestUpdate == 5, "Campaign is not in withdrawl phase as target is not reached yet.");
+        require(latestUpdate == 2 || latestUpdate == 42|| latestUpdate == 5, "You can create a new Withdrawal Request only if it is the first withdrawal request after target amount is collected, or if the previous withdrawal request has been successfully concluded.");
         require(_amount > 0 && _amount <= campaign.amountCollected - campaign.amountClaimed, "The amount should be greater than 0 and less than the remaining claimed amount.");
         
-        uint key = 300 +campaign.noOfWithdrawRequests;
-        withdrawRequests[_id][key] = WithdrawRequest({
+        uint wrId = 300 +campaign.noOfWithdrawRequests;
+        withdrawRequests[_id][wrId] = WithdrawRequest({
+            id: wrId,
             yesVotes: 0,
             noVotes: 0,
             amount: _amount,
             description: _description,
             docLink: _docLink,
-            isExpired: false
+            isActive: true
         });
-        campaign.updates.push(key);
+        campaign.updates.push(wrId);
         campaign.noOfWithdrawRequests++;
     }
 
-    function voteYes(uint256 _id, uint256 _key) public {
+    function voteYes(uint256 _id, uint256 _wrId) public onlyDonor(_id) {
         Campaign storage campaign = campaigns[_id];
-        require(donations[_id][msg.sender] > 0, "You are not a donor for this campaign, Only donors can vote.");
-        require(withdrawRequests[_id][_key].isExpired == false, "The voting period has expired.");
-        require(campaign.updates[campaign.updates.length - 1] == _key, "The campaign is not in the voting phase.");
+        // require(donations[_id][msg.sender] > 0, "You are not a donor for this campaign, Only donors can vote.");
+        require(withdrawRequests[_id][_wrId].isActive == true, "This withdraw request is not active for voting.");
+        require(campaign.updates[campaign.updates.length - 1] >= 300, "The campaign is not in the voting phase.");
 
-        withdrawRequests[_id][_key].yesVotes++;
-        if(withdrawRequests[_id][_key].yesVotes > campaign.donors.length / 2) {
-            withdrawRequests[_id][_key].isExpired = true;
+        withdrawRequests[_id][_wrId].yesVotes++;
+        if(withdrawRequests[_id][_wrId].yesVotes > campaign.donors.length / 2) {
+            withdrawRequests[_id][_wrId].isActive = false;
             campaign.updates.push(41);
         }
     }
 
-    function voteNo(uint256 _id, uint256 _key) public {
+    function voteNo(uint256 _id, uint256 _wrId) public onlyDonor(_id) {
         Campaign storage campaign = campaigns[_id];
-        require(donations[_id][msg.sender] > 0, "You are not a donor for this campaign, Only donors can vote.");
-        require(withdrawRequests[_id][_key].isExpired == false, "The voting period has expired.");
-        require(campaign.updates[campaign.updates.length - 1] == _key, "The campaign is not in the voting phase.");
+        // require(donations[_id][msg.sender] > 0, "You are not a donor for this campaign, Only donors can vote.");
+        require(withdrawRequests[_id][_wrId].isActive == true, "This withdraw request is not active for voting.");
+        require(campaign.updates[campaign.updates.length - 1] >= 300, "The campaign is not in the voting phase.");
 
-        withdrawRequests[_id][_key].noVotes++;
-        if(withdrawRequests[_id][_key].noVotes > campaign.donors.length / 2) { // 50% of donors vote no
-            withdrawRequests[_id][_key].isExpired = true;
+        withdrawRequests[_id][_wrId].noVotes++;
+        if(withdrawRequests[_id][_wrId].noVotes > campaign.donors.length / 2) { // 50% of donors vote no
+            withdrawRequests[_id][_wrId].isActive = false;
             campaign.updates.push(42);
         }
     }
 
-    function withdraw(uint256 _id) public {
+    function withdraw(uint256 _id) public onlyOwner(_id) {
         Campaign storage campaign = campaigns[_id];
-        require(campaign.owner == msg.sender, "You are not the owner of this campaign.");
-        require(campaign.updates[campaign.updates.length - 1] == 41, "Campaign is not in withdrawl phase.");
+        // require(campaign.owner == msg.sender, "You are not the owner of this campaign.");
+        require(campaign.updates[campaign.updates.length - 1] == 41, "Campaign is not in withdrawal phase.");
 
         uint256 amount = withdrawRequests[_id][campaign.updates[campaign.updates.length - 2]].amount;
 
@@ -168,6 +183,7 @@ contract SmartFundRaise {
 
     function addComment(uint256 _id, string memory _comment) public {
         comments[_id].push(Comment({
+            id: comments[_id].length,
             commenter: msg.sender,
             comment: _comment,
             timestamp: block.timestamp
@@ -179,7 +195,6 @@ contract SmartFundRaise {
 
         for(uint i = 0; i < numberOfCampaigns; i++) {
             Campaign storage item = campaigns[i];
-
             allCampaigns[i] = item;
         }
 
@@ -207,16 +222,8 @@ contract SmartFundRaise {
         return (donors, donationsArray);
     }
 
-    function isDonor(uint256 _id) public view returns (bool) {
-        return donations[_id][msg.sender] > 0;
-    }
 
     function getComments(uint256 _id) public view returns (Comment[] memory) {
         return comments[_id];
     }
 }
-
-
-
-
-

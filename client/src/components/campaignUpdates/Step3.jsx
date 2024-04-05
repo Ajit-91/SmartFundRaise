@@ -13,15 +13,12 @@ import { Button } from '../ui/button'
 
 const Step3 = ({ isLastestUpdate, updateId }) => {
   const { isDonor, getWithdrawRequest, voteYes, voteNo } = useStateContext();
-  const [ifDonor, setIfDonor] = useState(false)
   const [data, setData] = useState({});
   console.log({ step3D: data })
   useEffect(() => {
     (async () => {
       if (updateId) {
         getWithdrawRequest(updateId).then((res) => setData(res));
-        const res = await isDonor()
-        setIfDonor(res)
       }
     })()
   }, [updateId, getWithdrawRequest])
@@ -48,7 +45,7 @@ const Step3 = ({ isLastestUpdate, updateId }) => {
           </div>
           <Progress className="w-full h-2 mt-1 border border-primary-foreground" value={(data.noVotes * 100) / data.totalVotes} />
         </CardContent>
-        {ifDonor && (
+        {isDonor() && (
           <>
             {/* <CardDescription>Tip for donors: Always check the request details before voting</CardDescription> */}
             <CardFooter className="flex gap-4">

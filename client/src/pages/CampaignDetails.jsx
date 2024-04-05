@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Update from '@/components/campaignUpdates/Update';
 import { Button } from '@/components/ui/button';
 import { HandCoins } from 'lucide-react';
+import DisplayComments from '@/components/Comments/DisplayComments';
 
 
 const CampaignDetails = () => {
@@ -77,6 +78,7 @@ const CampaignDetails = () => {
             <TabsList>
               <TabsTrigger value="about">About</TabsTrigger>
               <TabsTrigger value="updates">Updates</TabsTrigger>
+              <TabsTrigger value="comments">Comments</TabsTrigger>
             </TabsList>
             <TabsContent value="about">
             <div className="mt-[20px]">
@@ -92,6 +94,11 @@ const CampaignDetails = () => {
                       isLastestUpdate = {index === currentCampaign.updates.length-1} 
                     />
                 ))}
+              </div>
+            </TabsContent>
+            <TabsContent value="comments">
+              <div className='flex flex-col justify-center w-full'>
+                <DisplayComments />
               </div>
             </TabsContent>
           </Tabs>

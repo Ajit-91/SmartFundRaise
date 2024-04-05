@@ -91,9 +91,10 @@ export const StateContextProvider = ({ children }) => {
 
   
   const getCampaignById = async (pId) => {
-    const campaign = await contract.call('campaigns', [currentCampaign.pId]);
+    const campaign = await contract.call('getCampaign', [currentCampaign.pId]);
     console.log({ campaign })
     return {
+      id: campaign.id.toNumber(),
       owner: campaign.owner,
       title: campaign.title,
       description: campaign.description,
@@ -102,6 +103,7 @@ export const StateContextProvider = ({ children }) => {
       amountCollected: ethers.utils.formatEther(campaign.amountCollected.toString()),
       image: campaign.image,
       updates: campaign.updates,
+      donors: campaign.donors,
       pId
     }
   }
@@ -129,6 +131,17 @@ export const StateContextProvider = ({ children }) => {
       description: "Your donation has been made successfully",
     })
   })();
+
+
+  const claimRefund = async () => handleError(async () => {
+    await contract.call('claimRefund', [currentCampaign.pId]);
+    const updatedCampaign = await getCampaignById(currentCampaign.pId);
+    setCurrentCampaign(updatedCampaign);
+    toast({
+      title: "Refund claimed",
+      description: "Your refund has been claimed successfully",
+    })
+  })()
 
   // const createWithdrawRequest = async (amount, description, dockLink) => {
   //   try {
@@ -232,11 +245,33 @@ export const StateContextProvider = ({ children }) => {
     })
   })()
 
+  const addComment = async (comment) => handleError(async () => {
+    await contract.call('addComment', [currentCampaign.pId, comment]);
+    // const updatedCampaign = await getCampaignById(currentCampaign.pId);
+    // setCurrentCampaign(updatedCampaign);
+    toast({
+      title: "Comment added",
+      description: "Your comment has been added successfully",
+    })
+  })()
+
+  const getComments = async () => {
+    const comments = await contract.call('getComments', [currentCampaign.pId]);
+    return comments.map((c) => {
+      return {
+        commenter: c.commenter,
+        comment: c.comment,
+        date: c.timestamp.toNumber()*1000,
+      }
+    })
+  }
+
 
   const getCampaigns = async () => {
     const campaigns = await contract.call('getCampaigns');
     console.log({ campaigns })
     const parsedCampaings = campaigns.map((campaign, i) => ({
+      id: campaign.id.toNumber(),
       owner: campaign.owner,
       title: campaign.title,
       description: campaign.description,
@@ -245,6 +280,7 @@ export const StateContextProvider = ({ children }) => {
       amountCollected: ethers.utils.formatEther(campaign.amountCollected.toString()),
       image: campaign.image,
       updates: campaign.updates,
+      donors: campaign.donors,
       pId: i
     }));
 
@@ -276,18 +312,20 @@ export const StateContextProvider = ({ children }) => {
   }
 
   const isOwner = () => address === currentCampaign.owner;
+  const isDonor = () => currentCampaign.donors.includes(address);
 
-  const isDonor = async () => {
-    try {
-      let data = await contract.call("donations", [currentCampaign.pId, address]);
-      data = ethers.BigNumber.from(data); // Convert to BigNumber
-      console.log({ isDonor: data })
-      return !data.isZero(); // Check if data is not zero
-    } catch (error) {
-      console.log("isDonor failure", error)
-      throw error
-    }
-  }
+  // const isDonor = async () => {
+  //   try {
+  //     let data = await contract.call("donations", [currentCampaign.pId, address]);
+  //     data = ethers.BigNumber.from(data); // Convert to BigNumber
+  //     console.log({ isDonor: data })
+  //     return !data.isZero(); // Check if data is not zero
+  //   } catch (error) {
+  //     console.log("isDonor failure", error)
+  //     throw error
+  //   }
+  // }
+
 
   const getWithdrawRequest = async (wrId) => {
     try {
@@ -322,6 +360,7 @@ export const StateContextProvider = ({ children }) => {
         isOwner,
         isDonor,
         donate,
+        claimRefund,
         getDonations,
         theme,
         toggleTheme,
@@ -333,6 +372,8 @@ export const StateContextProvider = ({ children }) => {
         withdraw,
         getWithdrawRequest,
         isLoading,
+        addComment,
+        getComments,
       }}
     >
       {children}
