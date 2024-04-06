@@ -58,7 +58,7 @@ const DisplayComments = () => {
                 </CardContent>
             </Card>
             {loading ? (
-                <div className="flex flex-wrap mt-[20px] gap-[26px]">
+                <div className='p-5 flex justify-center items-center w-full'>
                     <Loader variant="inline" />
                 </div>
             ) : (

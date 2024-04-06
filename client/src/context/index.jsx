@@ -3,6 +3,8 @@ import React, { useContext, createContext, useState, useEffect } from 'react';
 import { useAddress, useContract, useMetamask } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 import { useToast } from "@/components/ui/use-toast"
+import { ShieldAlert } from 'lucide-react';
+import { CircleCheckBig } from 'lucide-react';
 
 const StateContext = createContext();
 
@@ -42,7 +44,7 @@ export const StateContextProvider = ({ children }) => {
       console.log("Transaction failed : ", error)
       toast({
         variant: "destructive", 
-        title: "Transaction failed",
+        title: <div className="flex items-center"><ShieldAlert className='mr-3' /> Transaction Failed</div>,
         description: error?.reason || "Something went wrong",
       })
     } finally {
@@ -82,7 +84,7 @@ export const StateContextProvider = ({ children }) => {
       form.image,
     ]);
     toast({
-      title: "Campaign created successfully",
+      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Campaign created successfully</div>,
       description: "Your campaign has been created successfully",
     })
   })()
@@ -90,10 +92,10 @@ export const StateContextProvider = ({ children }) => {
 
 
   
-  const getCampaignById = async (pId) => {
-    const campaign = await contract.call('getCampaign', [currentCampaign.pId]);
+  const fetchCampaignById = async (id) => {
+    const campaign = await contract.call('getCampaign', [id]);
     console.log({ campaign })
-    return {
+    setCurrentCampaign ({
       id: campaign.id.toNumber(),
       owner: campaign.owner,
       title: campaign.title,
@@ -101,18 +103,18 @@ export const StateContextProvider = ({ children }) => {
       target: ethers.utils.formatEther(campaign.target.toString()),
       deadline: campaign.deadline.toNumber(),
       amountCollected: ethers.utils.formatEther(campaign.amountCollected.toString()),
+      amountClaimed: ethers.utils.formatEther(campaign.amountClaimed.toString()),
       image: campaign.image,
       updates: campaign.updates,
       donors: campaign.donors,
-      pId
-    }
+    })
   }
 
-  // const donate = async (pId, amount) => {
+  // const donate = async (id, amount) => {
   //   try {
   //     if (!amount) return alert("Please enter a valid amount to donate");
   //     setIsLoading(true);
-  //     await contract.call('donateToCampaign', [pId], { value: ethers.utils.parseEther(amount) });
+  //     await contract.call('donateToCampaign', [id], { value: ethers.utils.parseEther(amount) });
   //   } catch (error) {
   //     const errorReason = error?.reason;
   //     console.log("donate failure", error)
@@ -122,23 +124,21 @@ export const StateContextProvider = ({ children }) => {
   //   }
   // }
 
-  const donate = async (pId, amount) => handleError(async () => {
-    await contract.call('donateToCampaign', [pId], { value: ethers.utils.parseEther(amount) });
-    const updatedCampaign = await getCampaignById(pId);
-    setCurrentCampaign(updatedCampaign);
+  const donate = async (id, amount) => handleError(async () => {
+    await contract.call('donateToCampaign', [id], { value: ethers.utils.parseEther(amount) });
+    await fetchCampaignById(id);
     toast({
-      title: "Donation successful",
+      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Donation successfull</div>,
       description: "Your donation has been made successfully",
     })
   })();
 
 
   const claimRefund = async () => handleError(async () => {
-    await contract.call('claimRefund', [currentCampaign.pId]);
-    const updatedCampaign = await getCampaignById(currentCampaign.pId);
-    setCurrentCampaign(updatedCampaign);
+    await contract.call('claimRefund', [currentCampaign.id]);
+    await fetchCampaignById(currentCampaign.id);
     toast({
-      title: "Refund claimed",
+      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Refund Claimed</div>,
       description: "Your refund has been claimed successfully",
     })
   })()
@@ -147,7 +147,7 @@ export const StateContextProvider = ({ children }) => {
   //   try {
   //     setIsLoading(true);
   //     await contract.call('createWithdrawRequest', [
-  //       currentCampaign.pId,
+  //       currentCampaign.id,
   //       ethers.utils.parseUnits(amount, 18),
   //       description,
   //       dockLink
@@ -164,15 +164,14 @@ export const StateContextProvider = ({ children }) => {
 
   const createWithdrawRequest = async (amount, description, dockLink) => handleError(async () => {
     await contract.call('createWithdrawRequest', [
-      currentCampaign.pId,
+      currentCampaign.id,
       ethers.utils.parseUnits(amount, 18),
       description,
       dockLink
     ]);
-    const updatedCampaign = await getCampaignById(currentCampaign.pId);
-    setCurrentCampaign(updatedCampaign);
+    await fetchCampaignById(currentCampaign.id);
     toast({
-      title: "Withdraw request created",
+      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Withdraw request created</div>,
       description: "Your withdraw request has been created successfully",
     })
   })()
@@ -181,7 +180,7 @@ export const StateContextProvider = ({ children }) => {
   // const voteYes = async (wrId) => {
   //   try {
   //     setIsLoading(true);
-  //     await contract.call('voteYes', [currentCampaign.pId, wrId]);
+  //     await contract.call('voteYes', [currentCampaign.id, wrId]);
   //   } catch (error) {
   //     console.log("voteYes failure", error)
   //     alert("Failed to vote")
@@ -191,11 +190,10 @@ export const StateContextProvider = ({ children }) => {
   // }
 
   const voteYes = async (wrId) => handleError(async () => {
-    await contract.call('voteYes', [currentCampaign.pId, wrId]);
-    const updatedCampaign = await getCampaignById(currentCampaign.pId);
-    setCurrentCampaign(updatedCampaign);
+    await contract.call('voteYes', [currentCampaign.id, wrId]);
+    await fetchCampaignById(currentCampaign.id);
     toast({
-      title: "Vote successful",
+      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Vote successful</div>,
       description: "Your vote has been recorded successfully",
     })
   })()
@@ -204,7 +202,7 @@ export const StateContextProvider = ({ children }) => {
   // const voteNo = async (wrId) => {
   //   try {
   //     setIsLoading(true);
-  //     await contract.call('voteNo', [currentCampaign.pId, wrId]);
+  //     await contract.call('voteNo', [currentCampaign.id, wrId]);
   //   } catch (error) {
   //     console.log("voteNo failure", error)
   //     alert("Failed to vote")
@@ -214,11 +212,10 @@ export const StateContextProvider = ({ children }) => {
   // }
 
   const voteNo = async (wrId) => handleError(async () => {
-    await contract.call('voteNo', [currentCampaign.pId, wrId]);
-    const updatedCampaign = await getCampaignById(currentCampaign.pId);
-    setCurrentCampaign(updatedCampaign);
+    await contract.call('voteNo', [currentCampaign.id, wrId]);
+    await fetchCampaignById(currentCampaign.id);
     toast({
-      title: "Vote successful",
+      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Vote successful</div>,
       description: "Your vote has been recorded successfully",
     })
   })()
@@ -226,7 +223,7 @@ export const StateContextProvider = ({ children }) => {
   // const withdraw = async () => {
   //   try {
   //     setIsLoading(true);
-  //     await contract.call('withdraw', [currentCampaign.pId]);
+  //     await contract.call('withdraw', [currentCampaign.id]);
   //   } catch (error) {
   //     console.log("withdraw failure", error)
   //     throw error;
@@ -236,27 +233,26 @@ export const StateContextProvider = ({ children }) => {
   // }
 
   const withdraw = async () => handleError(async () => {
-    await contract.call('withdraw', [currentCampaign.pId]);
-    const updatedCampaign = await getCampaignById(currentCampaign.pId);
-    setCurrentCampaign(updatedCampaign);
+    await contract.call('withdraw', [currentCampaign.id]);
+    await fetchCampaignById(currentCampaign.id);
     toast({
-      title: "Withdraw successful",
+      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Withdraw successful</div>,
       description: "Your withdraw has been made successfully",
     })
   })()
 
   const addComment = async (comment) => handleError(async () => {
-    await contract.call('addComment', [currentCampaign.pId, comment]);
-    // const updatedCampaign = await getCampaignById(currentCampaign.pId);
+    await contract.call('addComment', [currentCampaign.id, comment]);
+    // const updatedCampaign = await fetchCampaignById(currentCampaign.id);
     // setCurrentCampaign(updatedCampaign);
     toast({
-      title: "Comment added",
+      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Comment added</div>,
       description: "Your comment has been added successfully",
     })
   })()
 
   const getComments = async () => {
-    const comments = await contract.call('getComments', [currentCampaign.pId]);
+    const comments = await contract.call('getComments', [currentCampaign.id]);
     return comments.map((c) => {
       return {
         commenter: c.commenter,
@@ -269,7 +265,6 @@ export const StateContextProvider = ({ children }) => {
 
   const getCampaigns = async () => {
     const campaigns = await contract.call('getCampaigns');
-    console.log({ campaigns })
     const parsedCampaings = campaigns.map((campaign, i) => ({
       id: campaign.id.toNumber(),
       owner: campaign.owner,
@@ -278,11 +273,13 @@ export const StateContextProvider = ({ children }) => {
       target: ethers.utils.formatEther(campaign.target.toString()),
       deadline: campaign.deadline.toNumber(),
       amountCollected: ethers.utils.formatEther(campaign.amountCollected.toString()),
+      amountClaimed: ethers.utils.formatEther(campaign.amountClaimed.toString()),
       image: campaign.image,
       updates: campaign.updates,
       donors: campaign.donors,
-      pId: i
     }));
+
+    console.log({ parsedCampaings })
 
     return parsedCampaings;
   }
@@ -295,8 +292,8 @@ export const StateContextProvider = ({ children }) => {
   }
 
 
-  const getDonations = async (pId) => {
-    const donations = await contract.call('getDonorsAndDonations', [pId]);
+  const getDonations = async (id) => {
+    const donations = await contract.call('getDonorsAndDonations', [id]);
     const numberOfDonations = donations[0].length;
 
     const parsedDonations = [];
@@ -316,7 +313,7 @@ export const StateContextProvider = ({ children }) => {
 
   // const isDonor = async () => {
   //   try {
-  //     let data = await contract.call("donations", [currentCampaign.pId, address]);
+  //     let data = await contract.call("donations", [currentCampaign.id, address]);
   //     data = ethers.BigNumber.from(data); // Convert to BigNumber
   //     console.log({ isDonor: data })
   //     return !data.isZero(); // Check if data is not zero
@@ -329,7 +326,7 @@ export const StateContextProvider = ({ children }) => {
 
   const getWithdrawRequest = async (wrId) => {
     try {
-      const data = await contract.call("withdrawRequests", [currentCampaign.pId, wrId]);
+      const data = await contract.call("withdrawRequests", [currentCampaign.id, wrId]);
       console.log({ wrData: data })
       const yes = data.yesVotes.toNumber();
       const no = data.noVotes.toNumber();
