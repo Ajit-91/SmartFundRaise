@@ -12,9 +12,11 @@ import { FormField } from ".."
 import { checkIfValidUrl } from "@/utils"
 import { useStateContext } from "@/context"
 import { Button } from "../ui/button"
+import { useToast } from "@/components/ui/use-toast"
 
 export function WithdrawRequest({ isLastestUpdate }) {
     const {createWithdrawRequest} = useStateContext()
+  const { toast } = useToast()
     const [form, setForm] = useState({
         amount: "",
         description: "",
@@ -28,8 +30,11 @@ export function WithdrawRequest({ isLastestUpdate }) {
     const handleSubmit = async (e) => {
         e.preventDefault()
         const { amount, description, docLink } = form
-        if (!amount || !description) return alert("amount and description are mandatory fields")
-        if(docLink && !checkIfValidUrl(docLink)) return alert("Please provide a valid document link")
+        if(docLink && !checkIfValidUrl(docLink)) return toast({
+            variant : "destructive",
+            title : "Validation Error",
+            description : "Please provide a valid document link"
+        })
         await createWithdrawRequest(amount, description, docLink)
     }
 

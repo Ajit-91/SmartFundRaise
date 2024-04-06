@@ -3,8 +3,6 @@ import React, { useContext, createContext, useState, useEffect } from 'react';
 import { useAddress, useContract, useMetamask } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 import { useToast } from "@/components/ui/use-toast"
-import { ShieldAlert } from 'lucide-react';
-import { CircleCheckBig } from 'lucide-react';
 
 const StateContext = createContext();
 
@@ -38,15 +36,21 @@ export const StateContextProvider = ({ children }) => {
 
   const handleError = (fun) => async () => {
     try {
+      if(!address) {
+        const err = new Error();
+        err.reason = "Please connect your metamask wallet to perform this action";
+        throw err;
+      }
       setIsLoading(true);
       await fun();
     } catch (error) {
       console.log("Transaction failed : ", error)
       toast({
         variant: "destructive", 
-        title: <div className="flex items-center"><ShieldAlert className='mr-3' /> Transaction Failed</div>,
+        title: "Transaction Failed",
         description: error?.reason || "Something went wrong",
       })
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -84,11 +88,11 @@ export const StateContextProvider = ({ children }) => {
       form.image,
     ]);
     toast({
-      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Campaign created successfully</div>,
+      variant: "success",
+      title: "Campaign created successfully",
       description: "Your campaign has been created successfully",
     })
   })()
-
 
 
   
@@ -128,7 +132,8 @@ export const StateContextProvider = ({ children }) => {
     await contract.call('donateToCampaign', [id], { value: ethers.utils.parseEther(amount) });
     await fetchCampaignById(id);
     toast({
-      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Donation successfull</div>,
+      variant: "success",
+      title:"Donation successful",
       description: "Your donation has been made successfully",
     })
   })();
@@ -138,7 +143,8 @@ export const StateContextProvider = ({ children }) => {
     await contract.call('claimRefund', [currentCampaign.id]);
     await fetchCampaignById(currentCampaign.id);
     toast({
-      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Refund Claimed</div>,
+      variant: "success",
+      title:"Refund Claimed",
       description: "Your refund has been claimed successfully",
     })
   })()
@@ -171,7 +177,8 @@ export const StateContextProvider = ({ children }) => {
     ]);
     await fetchCampaignById(currentCampaign.id);
     toast({
-      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Withdraw request created</div>,
+      variant: "success",
+      title: "Withdraw request created",
       description: "Your withdraw request has been created successfully",
     })
   })()
@@ -193,7 +200,8 @@ export const StateContextProvider = ({ children }) => {
     await contract.call('voteYes', [currentCampaign.id, wrId]);
     await fetchCampaignById(currentCampaign.id);
     toast({
-      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Vote successful</div>,
+      variant: "success",
+      title: "Vote successful",
       description: "Your vote has been recorded successfully",
     })
   })()
@@ -215,7 +223,8 @@ export const StateContextProvider = ({ children }) => {
     await contract.call('voteNo', [currentCampaign.id, wrId]);
     await fetchCampaignById(currentCampaign.id);
     toast({
-      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Vote successful</div>,
+      variant: "success",
+      title: "Vote successful",
       description: "Your vote has been recorded successfully",
     })
   })()
@@ -236,17 +245,17 @@ export const StateContextProvider = ({ children }) => {
     await contract.call('withdraw', [currentCampaign.id]);
     await fetchCampaignById(currentCampaign.id);
     toast({
-      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Withdraw successful</div>,
+      variant: "success",
+      title: "Withdraw successful",
       description: "Your withdraw has been made successfully",
     })
   })()
 
   const addComment = async (comment) => handleError(async () => {
     await contract.call('addComment', [currentCampaign.id, comment]);
-    // const updatedCampaign = await fetchCampaignById(currentCampaign.id);
-    // setCurrentCampaign(updatedCampaign);
     toast({
-      title:<div className="flex items-center"><CircleCheckBig className='mr-3' />Comment added</div>,
+      variant: "success",
+      title: "Comment added",
       description: "Your comment has been added successfully",
     })
   })()

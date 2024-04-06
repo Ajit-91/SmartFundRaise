@@ -9,13 +9,14 @@ import Update from '@/components/campaignUpdates/Update';
 import { Button } from '@/components/ui/button';
 import { HandCoins } from 'lucide-react';
 import DisplayComments from '@/components/Comments/DisplayComments';
-
+import { useToast } from "@/components/ui/use-toast"
 
 const CampaignDetails = () => {
   const navigate = useNavigate();
   const { donate, getDonations, contract, address, currentCampaign } = useStateContext();
   const [amount, setAmount] = useState('');
   const [donators, setDonators] = useState([]);
+  const { toast } = useToast()
 
   useEffect(() => {
     if(!currentCampaign || Object.keys(currentCampaign).length === 0) return navigate('/')
@@ -36,7 +37,13 @@ const CampaignDetails = () => {
   }, [contract, address, currentCampaign])
 
   const handleDonate = async () => {
-    if(!amount) return alert("Please enter a valid amount to donate");
+    if(!amount){
+      return toast({
+        variant: "destructive", 
+        title: "Validation Error",
+        description: "Please enter the amount to donate.",
+      })
+    }
     await donate(currentCampaign.id, amount);
   }
 

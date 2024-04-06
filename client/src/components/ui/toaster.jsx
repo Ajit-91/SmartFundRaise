@@ -7,6 +7,8 @@ import {
   ToastViewport,
 } from "@/components/ui/toast"
 import { useToast } from "@/components/ui/use-toast"
+import { ShieldAlert } from 'lucide-react';
+import { CircleCheckBig } from 'lucide-react';
 
 export function Toaster() {
   const { toasts } = useToast()
@@ -17,7 +19,19 @@ export function Toaster() {
         return (
           (<Toast key={id} {...props}>
             <div className="grid gap-1">
-              {title && <ToastTitle>{title}</ToastTitle>}
+              {title && (
+                <ToastTitle>
+                  {props.variant === "destructive" ? (
+                    <div className="flex items-center"><ShieldAlert className='mr-3' /> {title}</div>
+                  ) : props.variant === "success" ? (
+                    <div className="flex items-center"><CircleCheckBig className='mr-3' />{title}</div>
+                  ) : (
+                    <>
+                      {title}
+                    </>
+                  )}
+                </ToastTitle>
+              )}
               {description && (
                 <ToastDescription>{description}</ToastDescription>
               )}

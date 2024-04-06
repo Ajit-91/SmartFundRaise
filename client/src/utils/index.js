@@ -1,5 +1,5 @@
 export const daysLeft = (deadline) => {
-  const difference = new Date(deadline*1000).getTime() - Date.now();
+  const difference = new Date(deadline * 1000).getTime() - Date.now();
   const remainingDays = difference / (1000 * 3600 * 24);
 
   return remainingDays.toFixed(0);
@@ -21,11 +21,12 @@ export const checkIfImage = (url, callback) => {
   img.onerror = () => callback(false);
 };
 
-export const checkIfValidUrl = (url) => {
+export const checkIfValidUrl = (str) => {
+  let url;
   try {
-    new URL(url);
-    return true;
-  } catch (error) {
+    url = new URL(str);
+  } catch (_) {
     return false;
   }
+  return url.protocol === "http:" || url.protocol === "https:";
 }

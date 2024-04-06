@@ -61,7 +61,11 @@ module.exports = {
             light: "#a97cff",
             darker: "#635597"
           },
-          secondary: "#1dc071"
+          secondary: {
+            DEFAULT: "#1dc071",
+            light: "#45cf88",
+            dark: "#0fa25e",
+          }
         }
       },
       borderRadius: {
