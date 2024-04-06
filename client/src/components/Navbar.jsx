@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 import { useStateContext } from '../context';
 import { metamask } from '../assets';
@@ -17,7 +17,9 @@ const Navbar = () => {
     <div className="flex md:flex-row flex-col-reverse justify-between mb-[35px] gap-6">
       <div className=' w-full flex justify-between' >
         <div className='sm:flex hidden' >
-          <h1 className="text-[24px] font-bold text-custom-primary text-left">SmartFundRaise</h1>
+          <h1 className="text-[24px] font-bold text-custom-primary text-left">
+            <Link to="/" >SmartFundRaise</Link>
+          </h1>
         </div>
         <div className="sm:flex hidden flex-row justify-end gap-4">
 
@@ -51,9 +53,13 @@ const Navbar = () => {
       {/* Small screen navigation */}
       <div className="sm:hidden flex justify-between items-center relative">
         <div className="w-[40px] h-[40px] rounded-[10px] dark:bg-[#2c2f32] flex justify-center items-center cursor-pointer">
-          <Flower className="text-custom-primary" size={45} />
+          <Link to="/">
+            <Flower className="text-custom-primary" size={45} />
+          </Link>
         </div>
-        <h1 className="text-[24px] font-bold text-custom-primary">SmartFundRaise</h1>
+        <h1 className="text-[24px] font-bold text-custom-primary">
+          <Link to="/" >SmartFundRaise</Link>
+        </h1>
 
         <Menu
           className="w-[34px] h-[34px] object-contain cursor-pointer"
@@ -72,7 +78,7 @@ const Navbar = () => {
                   navigate(link.link);
                 }}
               >
-                <link.ImgUrl
+                <link.Icon
                   className={`w-[24px] h-[24px] text-custom-primary object-contain ${isActive === link.name ? 'grayscale-0' : 'grayscale'}`}
                 />
                 <p className={`ml-[20px] font-epilogue font-semibold text-[14px] ${isActive === link.name ? 'text-custom-primary' : 'text-[#808191]'}`}>

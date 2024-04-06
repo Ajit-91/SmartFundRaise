@@ -1,19 +1,18 @@
-import { createCampaign, dashboard, logout, payment, profile, withdraw } from '../assets';
 import { LayoutDashboard, PackagePlus, CircleUserRound  } from 'lucide-react';
 export const navlinks = [
   {
     name: 'dashboard',
-    ImgUrl: LayoutDashboard,
+    Icon: LayoutDashboard,
     link: '/',
   },
   {
     name: 'campaign',
-    ImgUrl: PackagePlus,
+    Icon: PackagePlus,
     link: '/create-campaign',
   },
   {
     name: 'profile',
-    ImgUrl: CircleUserRound,
+    Icon: CircleUserRound,
     link: '/profile',
   },
 ];
