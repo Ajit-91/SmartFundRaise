@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { HandCoins } from 'lucide-react';
 import DisplayComments from '@/components/Comments/DisplayComments';
 import { useToast } from "@/components/ui/use-toast"
+import CountdownTimer from '@/components/CountdownTimer';
 
 const CampaignDetails = () => {
   const navigate = useNavigate();
@@ -64,6 +65,10 @@ const CampaignDetails = () => {
           <CountBox title={`Claimed of ${currentCampaign.target}`} value={currentCampaign.amountClaimed} />
           <CountBox title="Total Donors" value={donators.length} />
         </div>
+      </div>
+
+      <div className="mt-10" >
+        <CountdownTimer deadline={currentCampaign.deadline} />
       </div>
 
       <div className="mt-[60px] flex lg:flex-row flex-col gap-5">

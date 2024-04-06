@@ -36,6 +36,7 @@ const CreateCampaign = () => {
       return;
     } 
     try {
+      form.deadline = form.deadline + "T11:59:59";
       await createCampaign({ ...form, target: ethers.utils.parseUnits(form.target, 18)})
       navigate('/profile');
     } catch (error) {
