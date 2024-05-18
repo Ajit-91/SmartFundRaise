@@ -30,3 +30,8 @@ export const checkIfValidUrl = (str) => {
   }
   return url.protocol === "http:" || url.protocol === "https:";
 }
+
+export const ipfsToHttp = (url) => {
+  const hash = url.split("//")[1];
+  return `https://${import.meta.env.VITE_THIRDWEB_CLIENT_ID}.ipfscdn.io/ipfs/${hash}`
+}

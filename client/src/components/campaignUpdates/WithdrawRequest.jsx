@@ -20,21 +20,23 @@ export function WithdrawRequest({ isLastestUpdate }) {
     const [form, setForm] = useState({
         amount: "",
         description: "",
-        docLink: "",
+        docLink: null,
     })
 
     const handleChange = (e, fieldName) => {
+        const value = fieldName === "docLink" ? e.target.files[0] : e.target.value;
+        console.log({value})
         setForm({ ...form, [fieldName]: e.target.value })
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         const { amount, description, docLink } = form
-        if(docLink && !checkIfValidUrl(docLink)) return toast({
-            variant : "destructive",
-            title : "Validation Error",
-            description : "Please provide a valid document link"
-        })
+        // if(docLink && !checkIfValidUrl(docLink)) return toast({
+        //     variant : "destructive",
+        //     title : "Validation Error",
+        //     description : "Please provide a valid document link"
+        // })
         await createWithdrawRequest(amount, description, docLink)
     }
 
@@ -76,7 +78,7 @@ export function WithdrawRequest({ isLastestUpdate }) {
                     <FormField
                         labelName="Document Link"
                         placeholder="https://exampleDocumentLink.com"
-                        inputType="text"
+                        inputType="file"
                         value={form.docLink}
                         required={false}
                         handleChange={(e) => handleChange(e, 'docLink')}

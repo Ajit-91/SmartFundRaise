@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { MediaRenderer } from "@thirdweb-dev/react";
 import { metamask } from '../assets';
 import { daysLeft } from '../utils';
 
@@ -8,7 +8,9 @@ const FundCard = ({ owner, title, description, target, deadline, amountCollected
   
   return (
     <div className="sm:w-[288px] w-full rounded-[15px] bg-[#ffffff] dark:bg-[#1c1c24] cursor-pointer" onClick={handleClick}>
-      <img src={image} alt="fund" className="w-full h-[158px] object-cover rounded-[15px]"/>
+      <div className="w-full h-[158px] object-cover rounded-[15px]">
+        <MediaRenderer src={image} alt="campaign" style={{objectFit: 'fill', borderRadius: '15px'}} width='100%' height='100%' />
+      </div>
 
       <div className="flex flex-col p-4">
         {/* <div className="flex flex-row items-center mb-[18px]">

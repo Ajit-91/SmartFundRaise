@@ -12,6 +12,7 @@ import { useStateContext } from '@/context'
 import { Button } from '../ui/button'
 import RenderLargeText from '../RenderLargeText'
 import { Loader } from '..'
+import { ipfsToHttp } from '@/utils'
 
 const Step3 = ({ isLastestUpdate, updateId }) => {
   const { isDonor, getWithdrawRequest, voteYes, voteNo } = useStateContext();
@@ -45,7 +46,7 @@ const Step3 = ({ isLastestUpdate, updateId }) => {
               <CardDescription>
                 <RenderLargeText text={data.description} />
               </CardDescription>
-              {data.docLink && <a href={data.docLink} target='_blank' className="text-custom-primary">Doc link</a>}
+              {data.docLink && <a href={ipfsToHttp(data.docLink)} target='_blank' className="text-custom-primary">Doc link</a>}
               <CardDescription className="text-center mt-2">Total votes: {data.totalVotes}</CardDescription>
               <div className="flex items-center gap-4">
                 <div className="w-1/2">Yes</div>

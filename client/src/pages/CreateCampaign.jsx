@@ -21,20 +21,33 @@ const CreateCampaign = () => {
   });
 
   const handleFormFieldChange = (fieldName, e) => {
-    setForm({ ...form, [fieldName]: e.target.value })
+    const value = fieldName === "image" ? e.target.files[0] : e.target.value;
+    console.log({value})
+    if(fieldName === "image" && value.type.split('/')[0] !== 'image') {
+      toast({
+        variant: "destructive", 
+        title: "Validation Error",
+        description: "Please select a valid image file.",
+      })
+      return;
+    }
+    setForm({
+       ...form, 
+       [fieldName]: value 
+      })
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if(!checkIfValidUrl(form.image)) {
-      toast({
-        variant: "destructive", 
-        title: "Validation Error",
-        description: "Please provide a valid image URL.",
-      })
-      setForm({ ...form, image: '' });
-      return;
-    } 
+    // if(!checkIfValidUrl(form.image)) {
+    //   toast({
+    //     variant: "destructive", 
+    //     title: "Validation Error",
+    //     description: "Please provide a valid image URL.",
+    //   })
+    //   setForm({ ...form, image: '' });
+    //   return;
+    // } 
     try {
       form.deadline = form.deadline + "T11:59:59";
       await createCampaign({ ...form, target: ethers.utils.parseUnits(form.target, 18)})
@@ -87,8 +100,8 @@ const CreateCampaign = () => {
         <FormField 
             labelName="Campaign image *"
             placeholder="Place image URL of your campaign"
-            inputType="url"
-            value={form.image}
+            inputType="file"
+            inputProps={{ accept: "image/*" }}
             handleChange={(e) => handleFormFieldChange('image', e)}
           />
 

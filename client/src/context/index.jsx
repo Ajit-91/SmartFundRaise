@@ -1,6 +1,6 @@
 import React, { useContext, createContext, useState, useEffect } from 'react';
 
-import { useAddress, useContract, useMetamask } from '@thirdweb-dev/react';
+import { useAddress, useContract, useMetamask, useStorageUpload } from '@thirdweb-dev/react';
 import { ethers } from 'ethers';
 import { useToast } from "@/components/ui/use-toast"
 
@@ -11,6 +11,7 @@ export const StateContextProvider = ({ children }) => {
   const address = useAddress();
   const connect = useMetamask();
   const { toast } = useToast()
+  const { mutateAsync: upload } = useStorageUpload();
   
   const [theme, setTheme] = useState(localStorage.getItem('Theme') || 'light');
   const [currentCampaign, setCurrentCampaign] = useState({});
@@ -55,6 +56,19 @@ export const StateContextProvider = ({ children }) => {
       setIsLoading(false);
     }
   }
+
+  const uploadFile = async (file) => {
+    try {
+      const uris = await upload({ data: [file] });
+      console.log({uris})
+      return uris[0];
+    } catch (error) {
+      console.log("Failed to upload file", error)
+      error.reason = "Failed to upload file";
+      throw error;
+    }
+  }
+
   // const publishCampaign = async (form) => {
   //   try {
   //     console.log({ form })
@@ -79,19 +93,20 @@ export const StateContextProvider = ({ children }) => {
   
 
   const publishCampaign = async (form) => handleError(async () => {
-    await contract.call('createCampaign', [
-      address, // owner
-      form.title, // title
-      form.description, // description
-      form.target,
-      parseInt(new Date(form.deadline).getTime() / 1000), // deadline,
-      form.image,
-    ]);
-    toast({
-      variant: "success",
-      title: "Campaign created successfully",
-      description: "Your campaign has been created successfully",
-    })
+      form.image = await uploadFile(form.image)
+      await contract.call('createCampaign', [
+        address, // owner
+        form.title, // title
+        form.description, // description
+        form.target,
+        parseInt(new Date(form.deadline).getTime() / 1000), // deadline,
+        form.image,
+      ]);
+      toast({
+        variant: "success",
+        title: "Campaign created successfully",
+        description: "Your campaign has been created successfully",
+      })
   })()
 
 
@@ -169,6 +184,9 @@ export const StateContextProvider = ({ children }) => {
   // }
 
   const createWithdrawRequest = async (amount, description, dockLink) => handleError(async () => {
+    if(dockLink) dockLink = await uploadFile(dockLink);
+    if(dockLink === null) dockLink = "";
+    
     await contract.call('createWithdrawRequest', [
       currentCampaign.id,
       ethers.utils.parseUnits(amount, 18),
@@ -380,6 +398,7 @@ export const StateContextProvider = ({ children }) => {
         isLoading,
         addComment,
         getComments,
+        uploadFile,
       }}
     >
       {children}

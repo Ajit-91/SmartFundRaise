@@ -11,6 +11,7 @@ import { HandCoins } from 'lucide-react';
 import DisplayComments from '@/components/Comments/DisplayComments';
 import { useToast } from "@/components/ui/use-toast"
 import CountdownTimer from '@/components/CountdownTimer';
+import { MediaRenderer } from "@thirdweb-dev/react";
 
 const CampaignDetails = () => {
   const navigate = useNavigate();
@@ -52,7 +53,9 @@ const CampaignDetails = () => {
     <div>
       <div className="w-full flex md:flex-row flex-col mt-10 gap-[30px]">
         <div className="flex-1 flex-col">
-          <img src={currentCampaign.image} alt="campaign" className="w-full h-[410px] md:h-[520px] object-cover rounded-xl" />
+          <div className="w-full h-[410px] md:h-[520px] object-cover rounded-xl" >
+            <MediaRenderer src={currentCampaign.image} alt="campaign" style={{objectFit: 'fill'}} width='100%' height='100%' />
+          </div>
           <div className="relative w-full h-[5px] bg-[#3a3a43] mt-2">
             <div className="absolute h-full bg-custom-primary" style={{ width: `${calculateBarPercentage(currentCampaign.target, currentCampaign.amountCollected)}%`, maxWidth: '100%' }}>
             </div>
