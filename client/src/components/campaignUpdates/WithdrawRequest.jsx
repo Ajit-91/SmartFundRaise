@@ -9,24 +9,24 @@ import {
 } from "@/components/ui/dialog"
 import { useState } from "react"
 import { FormField } from ".."
-import { checkIfValidUrl } from "@/utils"
+// import { checkIfValidUrl } from "@/utils"
 import { useStateContext } from "@/context"
 import { Button } from "../ui/button"
-import { useToast } from "@/components/ui/use-toast"
+// import { useToast } from "@/components/ui/use-toast"
 
 export function WithdrawRequest({ isLastestUpdate }) {
     const {createWithdrawRequest} = useStateContext()
-  const { toast } = useToast()
+//   const { toast } = useToast()
     const [form, setForm] = useState({
         amount: "",
         description: "",
-        docLink: null,
+        docLink: "",
     })
 
     const handleChange = (e, fieldName) => {
         const value = fieldName === "docLink" ? e.target.files[0] : e.target.value;
         console.log({value})
-        setForm({ ...form, [fieldName]: e.target.value })
+        setForm({ ...form, [fieldName]: value })
     }
 
     const handleSubmit = async (e) => {
@@ -79,7 +79,7 @@ export function WithdrawRequest({ isLastestUpdate }) {
                         labelName="Document Link"
                         placeholder="https://exampleDocumentLink.com"
                         inputType="file"
-                        value={form.docLink}
+                        // value={form.docLink}
                         required={false}
                         handleChange={(e) => handleChange(e, 'docLink')}
                     />

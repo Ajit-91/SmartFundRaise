@@ -39,6 +39,8 @@ contract SmartFundRaise {
     mapping(uint256 => Campaign) private campaigns;
     mapping(uint256 => mapping(address => uint256)) private donations;
     mapping(uint256 => mapping(uint256 => WithdrawRequest)) public withdrawRequests;
+    // mapping to know whether a donor has voted for a withdraw request or not
+    mapping(uint256 => mapping(uint256 => mapping(address => bool))) public hasVoted;
     uint256 private numberOfCampaigns = 0;
 
     //  modifers - onlyOwner and onlyDonor
@@ -139,12 +141,14 @@ contract SmartFundRaise {
         // require(donations[_id][msg.sender] > 0, "You are not a donor for this campaign, Only donors can vote.");
         require(withdrawRequests[_id][_wrId].isActive == true, "This withdraw request is not active for voting.");
         require(campaign.updates[campaign.updates.length - 1] >= 300, "The campaign is not in the voting phase.");
+        require(hasVoted[_id][_wrId][msg.sender] == false, "You have already voted for this withdraw request.");
 
         withdrawRequests[_id][_wrId].yesVotes++;
         if(withdrawRequests[_id][_wrId].yesVotes > campaign.donors.length / 2) {
             withdrawRequests[_id][_wrId].isActive = false;
             campaign.updates.push(41);
         }
+        hasVoted[_id][_wrId][msg.sender] = true;
     }
 
     function voteNo(uint256 _id, uint256 _wrId) public onlyDonor(_id) {
@@ -152,12 +156,14 @@ contract SmartFundRaise {
         // require(donations[_id][msg.sender] > 0, "You are not a donor for this campaign, Only donors can vote.");
         require(withdrawRequests[_id][_wrId].isActive == true, "This withdraw request is not active for voting.");
         require(campaign.updates[campaign.updates.length - 1] >= 300, "The campaign is not in the voting phase.");
+        require(hasVoted[_id][_wrId][msg.sender] == false, "You have already voted for this withdraw request.");
 
         withdrawRequests[_id][_wrId].noVotes++;
         if(withdrawRequests[_id][_wrId].noVotes > campaign.donors.length / 2) { // 50% of donors vote no
             withdrawRequests[_id][_wrId].isActive = false;
             campaign.updates.push(42);
         }
+        hasVoted[_id][_wrId][msg.sender] = true;
     }
 
     function withdraw(uint256 _id) public onlyOwner(_id) {

@@ -184,9 +184,9 @@ export const StateContextProvider = ({ children }) => {
   // }
 
   const createWithdrawRequest = async (amount, description, dockLink) => handleError(async () => {
-    if(dockLink) dockLink = await uploadFile(dockLink);
-    if(dockLink === null) dockLink = "";
-    
+    if(dockLink){
+      dockLink = await uploadFile(dockLink);
+    }
     await contract.call('createWithdrawRequest', [
       currentCampaign.id,
       ethers.utils.parseUnits(amount, 18),

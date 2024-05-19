@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { useStateContext } from '../context';
 import { FormField } from '../components';
-import { checkIfValidUrl } from '../utils';
+// import { checkIfValidUrl } from '../utils';
 import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/components/ui/use-toast"
